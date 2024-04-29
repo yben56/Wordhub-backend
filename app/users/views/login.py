@@ -63,18 +63,22 @@ def login(request):
 
     #7.
     secret = os.environ.get('JWT_ENCRYPT_SECRET', 'JWT_ENCRYPT_SECRET not found')
-    token = jwt.encode(payload, secret, algorithm='HS256')
+    access_token = jwt.encode(payload, secret, algorithm='HS256')
+
+    token = {
+        'access_token' : access_token,
+        'refresh_token' : ''
+    }
 
     response = Response({
         'error' : False,
         'message' : '',
         'data' : {
-            'jwt' : token,
             'first_name' : user.first_name,
             'profile_picture' : user.profile_picture
         }
     }, status=status.HTTP_200_OK)
     
-    response.set_cookie(key='jwt', value=token, httponly=True)
+    response.set_cookie(key='token', value=token, httponly=True)
 
     return response
