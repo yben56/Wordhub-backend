@@ -4,8 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from ..validator import EmailValidator, PasswordValidator, TransformError
-from datetime import datetime, timedelta
-import jwt, os
+from ..authentication import create_access_token, create_refresh_token, decode_access_token
 
 from ..models import User
 from ..serializers import UserSerializer
@@ -55,30 +54,19 @@ def login(request):
         }, status=status.HTTP_403_FORBIDDEN)
 
     #6. jwt
-    payload = {
-        'id' : user.id,
-        'exp': datetime.utcnow() + timedelta(minutes=60),
-        'iat': datetime.utcnow()
-    }
-
-    #7.
-    secret = os.environ.get('JWT_ENCRYPT_SECRET', 'JWT_ENCRYPT_SECRET not found')
-    access_token = jwt.encode(payload, secret, algorithm='HS256')
-
-    token = {
-        'access_token' : access_token,
-        'refresh_token' : ''
-    }
+    access_token = create_access_token(user.id)
+    refresh_token = create_refresh_token(user.id)
 
     response = Response({
         'error' : False,
         'message' : '',
         'data' : {
+            'access_token' : access_token,
             'first_name' : user.first_name,
             'profile_picture' : user.profile_picture
         }
     }, status=status.HTTP_200_OK)
     
-    response.set_cookie(key='token', value=token, httponly=True)
+    response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
 
     return response

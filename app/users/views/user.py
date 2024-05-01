@@ -5,13 +5,15 @@ from rest_framework import status
 from ..models import User
 from ..serializers import UserSerializer
 
+from rest_framework.authentication import get_authorization_header
+from ..authentication import decode_access_token, decode_refresh_token
+
 @api_view(['GET'])    
 def user(request):
-    user = User.objects.filter(id=request.userinfo['id']).first()
-    serializer = UserSerializer(user, remove_password=True)
+    user_id = request.user_id
 
     return Response({
         'error' : False,
         'message' : '',
-        'data' : serializer.data
-        }, status=status.HTTP_200_OK)
+        'data' : {'user_id' : user_id}
+    }, status=status.HTTP_200_OK)
