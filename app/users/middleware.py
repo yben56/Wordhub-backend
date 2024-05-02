@@ -4,26 +4,37 @@ from rest_framework.authentication import get_authorization_header
 from .authentication import decode_access_token
 
 class AuthenticationMiddleware:
-    def __init__(self, get_response):
+    def __init__(self, get_response, optional=False):
         self.get_response = get_response
+        self.optional = optional
 
     def __call__(self, request):
-        #1.
+        #1. get header
         auth = get_authorization_header(request).split()
 
+        #2. optional authentication (access_token optional)
+        if self.optional and not auth:
+            request.user_id = False
+
+            response = self.get_response(request)
+            return response
+
+        #3. Authentication
         if not auth or len(auth) != 2:
             return self.unauthenticated_response()
         
-        #2. decode
+        #4. decode
         token = auth[1].decode('utf-8')
         decode = decode_access_token(token)
 
-        #3. error
+        #5. error
         if decode['error']:
             return self.unauthenticated_response(message=decode['message'])
 
+        #6. user_id
         request.user_id = decode['data']['user_id']
 
+        #7.
         response = self.get_response(request)
         return response
 
@@ -32,63 +43,3 @@ class AuthenticationMiddleware:
             'error': True,
             'message': message
         }, status=status.HTTP_401_UNAUTHORIZED)
-
-
-
-
-
-'''
-class AuthenticationMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        token = request.COOKIES.get('jwt')
-
-        if not token:
-            return JsonResponse({'error' : 'Unauthenticated'}, status=403)
-    
-        try:
-            #1. decode
-            secret = os.environ.get('JWT_ENCRYPT_SECRET', 'JWT_ENCRYPT_SECRET not found')
-            payload = jwt.decode(token, secret, algorithms=['HS256'])
-
-            #2. save user id after decode
-            request.userinfo = payload
-        except jwt.ExpiredSignatureError:
-            return JsonResponse({'error' : 'Token expired'}, status=403)
-        except jwt.DecodeError:
-            return JsonResponse({'error' : 'Invalid token'}, status=403)
-
-        response = self.get_response(request)
-        return response
-
-class UserIdMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        token = request.COOKIES.get('jwt')
-
-        if token:
-            try:
-                #1. decode
-                secret = os.environ.get('JWT_ENCRYPT_SECRET', 'JWT_ENCRYPT_SECRET not found')
-                payload = jwt.decode(token, secret, algorithms=['HS256'])
-
-                #2. save user id after decode
-                request.userinfo = payload
-            except jwt.ExpiredSignatureError:
-                return JsonResponse({'error' : 'Token expired'}, status=403)
-            except jwt.DecodeError:
-                return JsonResponse({'error' : 'Invalid token'}, status=403)
-        else:
-            request.userinfo = {
-                'id' : False,
-                'exp': False,
-                'iat': False
-            }
-        
-        response = self.get_response(request)
-        return response
-'''

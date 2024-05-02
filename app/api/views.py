@@ -66,23 +66,3 @@ def quizs(request):
         'message' : '',
         'data' : response
     }, status=200)
-
-@api_view(['GET'])
-def connectapi(request):
-    return Response({
-        'error' : False,
-        'message' : '',
-        'data' : {
-            'test' : 'ok'
-        }
-    }, status=status.HTTP_200_OK)
-
-@api_view(['GET'])
-def connectapi_lock(request):
-    return Response({
-        'error' : False,
-        'message' : '',
-        'data' : {
-            'user_id' : request.userinfo['id']
-        }
-    }, status=status.HTTP_200_OK)
