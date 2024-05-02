@@ -3,12 +3,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..authentication import create_access_token, decode_refresh_token
 
-from ..models import User
-from ..serializers import UserSerializer
-
-from rest_framework.authentication import get_authorization_header
-from ..authentication import decode_access_token, decode_refresh_token
-
 @api_view(['POST'])    
 def refresh_token(request):
     refresh_token = request.COOKIES.get('refresh_token')

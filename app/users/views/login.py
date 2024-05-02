@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from ..validator import EmailValidator, PasswordValidator, TransformError
+from ..models import User
 from ..authentication import create_access_token, create_refresh_token, decode_access_token
 
-from ..models import User
-from ..serializers import UserSerializer
+
 
 @api_view(['POST'])
 def login(request):
