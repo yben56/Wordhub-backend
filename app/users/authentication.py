@@ -48,7 +48,7 @@ def decode_refresh_token(token):
         return {
             'error' : False,
             'message' : '',
-            'data' : payload['user_id']
+            'data' : {'user_id' : payload['user_id']}
         }
     except jwt.ExpiredSignatureError:
         return {

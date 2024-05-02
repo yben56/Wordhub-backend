@@ -9,8 +9,6 @@ def logout(request):
         'message' : ''
     }, status=status.HTTP_200_OK)
 
-    #Remove record from db
-
-    response.delete_cookie('jwt')
+    response.delete_cookie(key='refresh_token')
     
     return response
