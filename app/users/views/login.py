@@ -3,11 +3,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from ..validator import EmailValidator, PasswordValidator, TransformError
+from ..authentication import create_token
 from ..models import User
-from ..authentication import create_access_token, create_refresh_token, decode_access_token
-
-
+from ..validator import EmailValidator, PasswordValidator, TransformError
+import os
 
 @api_view(['POST'])
 def login(request):
@@ -52,10 +51,10 @@ def login(request):
             'error': True,
             'message' : _('This email address has been registered but has not been confirmed yet. Please reconfirm your email')
         }, status=status.HTTP_403_FORBIDDEN)
-
-    #6. jwt
-    access_token = create_access_token(user.id)
-    refresh_token = create_refresh_token(user.id)
+    
+    #6. token
+    access_token = create_token(user.id, os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'))
+    refresh_token = create_token(user.id, os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET not found'))
 
     response = Response({
         'error' : False,

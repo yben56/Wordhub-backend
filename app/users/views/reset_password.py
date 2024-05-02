@@ -1,24 +1,20 @@
 from django.utils.translation import gettext as _
+from django.db import transaction
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from ..mail import sendmail
-from django.db import transaction
-from ..validator import EmailValidator, PasswordValidator, TransformError
-from django.contrib.auth.hashers import make_password
+from ..authentication import create_token, decode_token
 from django.utils import timezone
-from datetime import datetime, timedelta
-from ..jwtoken import jwtoken
-import jwt, os
-
+from datetime import timedelta
+from ..mail import sendmail
 from ..models import User, UserResetPassword
+from ..validator import EmailValidator, PasswordValidator, TransformError
+import os
 
 @api_view(['GET', 'POST', 'PUT'])
 def reset_password(request):
      
-     secret = os.environ.get('JWT_ENCRYPT_SECRET', 'JWT_ENCRYPT_SECRET not found')
-
      ##user request forgot password
      if request.method == 'POST':
         #1. validation
@@ -51,7 +47,7 @@ def reset_password(request):
             }, status=status.HTTP_403_FORBIDDEN)
 
         #5. token
-        token = jwtoken(user.id, secret)
+        token = create_token(user.id, os.environ.get('JWT_RESET_PASSWORD_SECRET', 'JWT_RESET_PASSWORD_SECRET not found'))
 
         #6. save record to user_reset_password
         UserResetPassword.objects.create(user_id=user.id, token=token, date=timezone.now())
@@ -91,21 +87,18 @@ def reset_password(request):
             }, status=status.HTTP_403_FORBIDDEN) 
 
         #2. decode
-        try:
-            payload = jwt.decode(token, secret, algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
+        decode = decode_token(token, os.environ.get('JWT_RESET_PASSWORD_SECRET', 'JWT_RESET_PASSWORD_SECRET not found'))
+        
+        if decode['error']:
             return Response({
                 'error' : True,
-                'message' : 'Token expired'
-            }, status=status.HTTP_403_FORBIDDEN) 
-        except jwt.DecodeError:
-            return Response({
-                'error' : True,
-                'message' : 'Invalid Token'
-            }, status=status.HTTP_403_FORBIDDEN) 
+                'message' : decode['message']
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        user_id = decode['data']['user_id']
 
         #3. check user
-        user = User.objects.filter(id=payload['id'], is_active=1).first()
+        user = User.objects.filter(id=user_id, is_active=1).first()
 
         #4. response
         return Response({
@@ -123,31 +116,24 @@ def reset_password(request):
                 'error' : True,
                 'message' : 'Unauthenticated'
             }, status=status.HTTP_403_FORBIDDEN) 
-
-        #2. decode
-        try:
-            payload = jwt.decode(token, secret, algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            return Response({
-                'error' : True,
-                'message' : 'Token expired'
-            }, status=status.HTTP_403_FORBIDDEN) 
-        except jwt.DecodeError:
-            return Response({
-                'error' : True,
-                'message' : 'Invalid Token'
-            }, status=status.HTTP_403_FORBIDDEN) 
         
+        #2. decode
+        decode = decode_token(token, os.environ.get('JWT_RESET_PASSWORD_SECRET', 'JWT_RESET_PASSWORD_SECRET not found'))
+        
+        if decode['error']:
+            return Response({
+                'error' : True,
+                'message' : decode['message']
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        user_id = decode['data']['user_id']
+
         #3. password validator
         password_validator = PasswordValidator(request.data)
 
         if password_validator.validate() == False:
             return Response(TransformError(password_validator.get_message()), status=status.HTTP_400_BAD_REQUEST)
         
-        #4. password encrypt
-        #request.data._mutable = True
-        pwd = make_password(request.data.get('password'))
-
         #5. check record
         resetpwd = UserResetPassword.objects.filter(token=token, used=0).first()
 
@@ -157,12 +143,15 @@ def reset_password(request):
             'message' : _('Can not find Reset Password request or this link already been used.')
         }, status=status.HTTP_403_FORBIDDEN)
 
+        #6.
         with transaction.atomic():
-            #5. update password
-            User.objects.filter(id=payload['id']).update(password=pwd)
+            #7. update password
+            user_instance = User.objects.get(id=user_id)
+            user_instance.set_password(request.data.get('password'))
+            user_instance.save()
 
-            #6. mark used reset password
-            UserResetPassword.objects.filter(token=token).update(used=1)
+            #8. mark used reset password
+            UserResetPassword.objects.filter(token=token).update(used=True)
 
         #7.
         return Response({

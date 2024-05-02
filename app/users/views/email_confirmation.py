@@ -3,13 +3,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from datetime import datetime, timedelta
-from ..validator import EmailValidator, TransformError
-import jwt, os
-from ..jwtoken import jwtoken
+from ..authentication import create_token, decode_token
 from ..mail import sendmail
-
 from ..models import User
+from ..validator import EmailValidator, TransformError
+import os
+
+
 
 @api_view(['GET', 'POST'])
 def email_confirmation(request):
@@ -25,36 +25,33 @@ def email_confirmation(request):
             }, status=status.HTTP_403_FORBIDDEN) 
 
         #2. decode
-        try:
-            payload = jwt.decode(token, os.environ.get('JWT_ENCRYPT_SECRET', 'JWT_ENCRYPT_SECRET not found'), algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
+        decode = decode_token(token, os.environ.get('JWT_EMAIL_CONFIRMATION_SECRET', 'JWT_EMAIL_CONFIRMATION_SECRET not found'))
+
+        if decode['error']:
             return Response({
                 'error' : True,
-                'message' : 'Token expired'
-            }, status=status.HTTP_403_FORBIDDEN) 
-        except jwt.DecodeError:
-            return Response({
-                'error' : True,
-                'message' : 'Invalid Token'
-            }, status=status.HTTP_403_FORBIDDEN) 
+                'message' : decode['message']
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        user_id = decode['data']['user_id']
 
         #3. check active
-        user = User.objects.filter(id=payload['id']).first()
+        user = User.objects.filter(id=user_id).first()
         
         if not user:
             return Response({
                 'error' : True,
                 'message' : _('We could not find this email address.')
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_403_FORBIDDEN)
 
         if user.is_active:
             return Response({
                 'error' : True,
                 'message' : _('This email address has already confirmed.')
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_403_FORBIDDEN)
         
         #4. update db
-        User.objects.filter(id=payload['id']).update(is_active=1)
+        User.objects.filter(id=user_id).update(is_active=1)
 
         #5. response
         return Response({
@@ -83,8 +80,7 @@ def email_confirmation(request):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         #3. token
-        secret = os.environ.get('JWT_ENCRYPT_SECRET', 'JWT_ENCRYPT_SECRET not found')
-        token = jwtoken(user.id, secret)
+        token = create_token(user.id, os.environ.get('JWT_EMAIL_CONFIRMATION_SECRET', 'JWT_EMAIL_CONFIRMATION_SECRET not found'))
 
         #4. send confirmation email
         site_url = os.environ.get('SITE_URL', 'SITE_URL not found')

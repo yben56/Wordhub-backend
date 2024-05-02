@@ -1,9 +1,9 @@
+from django.utils.translation import gettext as _
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from app.helpers import postman
-from django.utils.translation import gettext as _
 
+from app.helpers import postman
 import json, os
 
 @api_view(['GET'])

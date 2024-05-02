@@ -1,7 +1,9 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from ..authentication import create_access_token, decode_refresh_token
+
+from ..authentication import create_token, decode_token
+import os
 
 @api_view(['POST'])    
 def refresh_token(request):
@@ -15,7 +17,7 @@ def refresh_token(request):
         }, status=status.HTTP_401_UNAUTHORIZED)
     
     #2.
-    decode = decode_refresh_token(refresh_token)
+    decode = decode_token(refresh_token, os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESHS_SECRET not found'))
 
     if decode['error']:
         return Response({
@@ -24,7 +26,7 @@ def refresh_token(request):
         }, status=status.HTTP_401_UNAUTHORIZED)
     
     #3.
-    access_token = create_access_token(decode['data']['user_id'])
+    access_token = create_token(decode['data']['user_id'], os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'))
 
     return Response({
         'error': False,

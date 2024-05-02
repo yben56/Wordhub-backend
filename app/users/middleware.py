@@ -1,7 +1,9 @@
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.authentication import get_authorization_header
-from .authentication import decode_access_token
+
+from .authentication import decode_token
+import os
 
 class AuthenticationMiddleware:
     def __init__(self, get_response, optional=False):
@@ -25,7 +27,7 @@ class AuthenticationMiddleware:
         
         #4. decode
         token = auth[1].decode('utf-8')
-        decode = decode_access_token(token)
+        decode = decode_token(token, os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'))
 
         #5. error
         if decode['error']:
