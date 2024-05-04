@@ -81,6 +81,7 @@ def email_confirmation(request):
 
         #3. token
         token = create_token(user.id, os.environ.get('JWT_EMAIL_CONFIRMATION_SECRET', 'JWT_EMAIL_CONFIRMATION_SECRET not found'))
+        token = token['token']
 
         #4. send confirmation email
         site_url = os.environ.get('SITE_URL', 'SITE_URL not found')

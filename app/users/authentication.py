@@ -1,12 +1,18 @@
 from datetime import datetime, timedelta
 import jwt
 
-def create_token(id, password):
-    return jwt.encode({
+def create_token(id, password, t=1):
+    exp = datetime.utcnow() + timedelta(hours=t)
+    token = jwt.encode({
         'user_id' : id,
-        'exp': datetime.utcnow() + timedelta(minutes=60),
+        'exp': exp,
         'iat': datetime.utcnow()
     }, password, algorithm='HS256')
+
+    return {
+        'token' : token,
+        'exp' : exp
+    }
 
 def decode_token(token, password):
     try:

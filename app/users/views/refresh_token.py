@@ -32,6 +32,7 @@ def refresh_token(request):
         'error': False,
         'message': '',
         'data': {
-            'access_token' : access_token
+            'access_token' : access_token['token'],
+            'access_token_exp' : access_token['exp']
         }
     }, status=status.HTTP_401_UNAUTHORIZED)

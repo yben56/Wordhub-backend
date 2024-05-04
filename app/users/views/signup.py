@@ -55,6 +55,7 @@ def signup(request):
 
     #7. token
     token = create_token(user_id, os.environ.get('JWT_EMAIL_CONFIRMATION_SECRET', 'JWT_EMAIL_CONFIRMATION_SECRET not found'))
+    token = token['token']
 
     #8. confirmation email url
     site_url = os.environ.get('SITE_URL', 'SITE_URL not found')

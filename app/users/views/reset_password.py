@@ -48,6 +48,7 @@ def reset_password(request):
 
         #5. token
         token = create_token(user.id, os.environ.get('JWT_RESET_PASSWORD_SECRET', 'JWT_RESET_PASSWORD_SECRET not found'))
+        token = token['token']
 
         #6. save record to user_reset_password
         UserResetPassword.objects.create(user_id=user.id, token=token, date=timezone.now())

@@ -54,13 +54,16 @@ def login(request):
     
     #6. token
     access_token = create_token(user.id, os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'))
-    refresh_token = create_token(user.id, os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET not found'))
+    refresh_token = create_token(user.id, os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET not found'), 720)
 
     response = Response({
         'error' : False,
         'message' : '',
         'data' : {
-            'access_token' : access_token,
+            'access_token' : access_token['token'],
+            'access_token_exp' : access_token['exp'],
+            'refresh_token' : refresh_token['token'],
+            'refresh_token_exp' : refresh_token['exp'],
             'first_name' : user.first_name,
             'profile_picture' : user.profile_picture
         }
