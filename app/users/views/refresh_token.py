@@ -7,15 +7,18 @@ import os
 
 @api_view(['POST'])    
 def refresh_token(request):
-    refresh_token = request.COOKIES.get('refresh_token')
 
     #1.
-    if not refresh_token:
+    if request.COOKIES.get('refresh_token'):
+        refresh_token = request.COOKIES.get('refresh_token')
+    elif 'Authorization' in request.headers and request.headers['Authorization'].startswith('Bearer '):
+        refresh_token = request.headers['Authorization'].split(' ')[1]
+    else:
         return Response({
             'error' : True,
             'message' : 'Invalid token'
         }, status=status.HTTP_401_UNAUTHORIZED)
-    
+
     #2.
     decode = decode_token(refresh_token, os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESHS_SECRET not found'))
 
