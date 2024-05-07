@@ -18,6 +18,7 @@ def words(request):
     return Response({
         'error' : False,
         'message' : '',
+        'user_id' : request.user_id,
         'data' : response
     }, status=200)
 
