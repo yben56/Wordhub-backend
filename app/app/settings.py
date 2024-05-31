@@ -160,7 +160,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'EMAIL_BACKEND not found')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'EMAIL_HOST not found')
-EMAIL_PORT: 578
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'EMAIL_USE_TLS not found')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'EMAIL_HOST_USER not found')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'EMAIL_HOST_PASSWORD not found')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 'EMAIL_PORT not found')
