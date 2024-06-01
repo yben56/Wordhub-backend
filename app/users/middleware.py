@@ -10,7 +10,7 @@ class AuthenticationMiddleware:
         self.get_response = get_response
         self.optional = optional
 
-    def __call__(self, request):
+    def __call__(self, request, *args, **kwargs):
         #1. get header
         auth = get_authorization_header(request).split()
 
@@ -18,7 +18,7 @@ class AuthenticationMiddleware:
         if self.optional and not auth:
             request.user_id = False
 
-            response = self.get_response(request)
+            response = self.get_response(request, *args, **kwargs)
             return response
 
         #3. Authentication
@@ -37,7 +37,7 @@ class AuthenticationMiddleware:
         request.user_id = decode['data']['user_id']
 
         #7.
-        response = self.get_response(request)
+        response = self.get_response(request, *args, **kwargs)
         return response
 
     def unauthenticated_response(self, message='unauthenticated'):
