@@ -21,7 +21,8 @@ def search(request, word):
 
         search[index]['evaluation'] = {}
         search[index]['evaluation']['trials'] = 6
-        search[index]['evaluation']['conrrectness'] = 2
+        search[index]['evaluation']['correctness'] = 2
+        search[index]['evaluation']['accuracy'] = '{}%'.format(round((search[index]['evaluation']['correctness'] / search[index]['evaluation']['trials']) * 100))
     
     #associate
     associate = {}
@@ -40,7 +41,8 @@ def search(request, word):
 
         associate[index]['evaluation'] = {}
         associate[index]['evaluation']['trials'] = 6
-        associate[index]['evaluation']['conrrectness'] = 2
+        associate[index]['evaluation']['correctness'] = 2
+        associate[index]['evaluation']['accuracy'] = '{}%'.format(round((associate[index]['evaluation']['correctness'] / associate[index]['evaluation']['trials']) * 100))
 
     #remove associate from dict
     search = [{k: v for k, v in d.items() if k != "associate"} for d in search]
@@ -53,18 +55,4 @@ def search(request, word):
             'search' : search,
             'associate': associate
         }
-    }, status=200)
-    
-
-
-
-
-    data = open(os.getcwd() + '/api/database/Search.json', encoding='utf-8')
-    response = json.load(data)
-
-    #2. resposne
-    return Response({
-        'error' : False,
-        'message' : '',
-        'data' : response
     }, status=200)
