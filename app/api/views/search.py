@@ -9,11 +9,19 @@ import json, os
 
 @api_view(['GET'])
 def search(request, word):
-    '''
+    
     #word
     dictionaries = Dictionary.objects.filter(word=word)
     serializer = SearchSerializer(dictionaries, many=True)
     search = serializer.data
+
+    for index in range(len(search)):
+        search[index]['word_prounce'] = 'sounds/ding.mp3'
+        search[index]['probability'] = 6
+
+        search[index]['evaluation'] = {}
+        search[index]['evaluation']['trials'] = 6
+        search[index]['evaluation']['conrrectness'] = 2
     
     #associate
     associate = {}
@@ -25,6 +33,14 @@ def search(request, word):
     dictionaries = Dictionary.objects.filter(word__in=associate[0:10])
     serializer = SearchSerializer(dictionaries, many=True)
     associate = serializer.data
+
+    for index in range(len(associate)):
+        associate[index]['word_prounce'] = 'sounds/ding.mp3'
+        associate[index]['probability'] = 6
+
+        associate[index]['evaluation'] = {}
+        associate[index]['evaluation']['trials'] = 6
+        associate[index]['evaluation']['conrrectness'] = 2
 
     #remove associate from dict
     search = [{k: v for k, v in d.items() if k != "associate"} for d in search]
@@ -38,7 +54,7 @@ def search(request, word):
             'associate': associate
         }
     }, status=200)
-    '''
+    
 
 
 
