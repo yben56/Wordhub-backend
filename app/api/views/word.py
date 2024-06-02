@@ -11,11 +11,13 @@ import json, os
 @api_view(['GET'])
 def word(request, word, wordid):
     try:
-        '''
         word = Dictionary.objects.get(word=word, id=wordid)
         serializer = DictionarySerializer(word)
 
         data = serializer.data
+
+        data['sentences'] = json.loads(data['sentences'])
+        data['associate'] = json.loads(data['associate'])
 
         data['word_prounce'] = 'sounds/ding.mp3'
         data['probability'] = 6
@@ -23,25 +25,15 @@ def word(request, word, wordid):
         #evaluation (id, wordid, word, trials, correctness)
         data['evaluation'] = {}
         data['evaluation']['trials'] = 6
-        data['evaluation']['conrrectness'] = 2
-        data['evaluation']['accuracy'] = '{}%'.format(round((data['evaluation']['conrrectness'] / data['evaluation']['trials']) * 100))
+        data['evaluation']['correctness'] = 2
+        data['evaluation']['accuracy'] = '{}%'.format(round((data['evaluation']['correctness'] / data['evaluation']['trials']) * 100))
         
         return Response({
             'error' : False,
             'message' : '',
             'data' : data
         }, status=200)
-        '''
-
-        data = open(os.getcwd() + '/api/database/Word.json', encoding='utf-8')
-        response = json.load(data)
-
-        #2. resposne
-        return Response({
-            'error' : False,
-            'message' : '',
-            'data' : response
-        }, status=200)
+    
     except Dictionary.DoesNotExist:
         return Response({
             'error': True,
