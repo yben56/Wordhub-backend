@@ -9,6 +9,8 @@ import json, os
 
 @api_view(['GET'])
 def search(request, word):
+    word = word.lower()
+    
     #1. search
     dictionaries = Dictionary.objects.filter(word=word)
     serializer = SearchSerializer(dictionaries, many=True)
