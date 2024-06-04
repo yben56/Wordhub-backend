@@ -11,23 +11,26 @@ import json, os
 @api_view(['GET'])
 def word(request, word, wordid):
     try:
+        #1. fetch
         word = Dictionary.objects.get(word=word, id=wordid)
         serializer = DictionarySerializer(word)
-
         data = serializer.data
 
+        #2. json
         data['sentences'] = json.loads(data['sentences'])
         data['associate'] = json.loads(data['associate'])
 
         data['word_prounce'] = 'sounds/ding.mp3'
         data['probability'] = 6
 
-        #evaluation (id, wordid, word, trials, correctness)
-        data['evaluation'] = {}
-        data['evaluation']['trials'] = 6
-        data['evaluation']['correctness'] = 2
-        data['evaluation']['accuracy'] = '{}%'.format(round((data['evaluation']['correctness'] / data['evaluation']['trials']) * 100))
+        #3. evaluation (id, wordid, word, trials, correctness)
+        if request.user_id:
+            data['evaluation'] = {}
+            data['evaluation']['trials'] = 6
+            data['evaluation']['correctness'] = 2
+            data['evaluation']['accuracy'] = '{}%'.format(round((data['evaluation']['correctness'] / data['evaluation']['trials']) * 100))
         
+        #4. output
         return Response({
             'error' : False,
             'message' : '',

@@ -7,4 +7,5 @@ urlpatterns = [
     path('words', AuthenticationMiddleware(views.words, optional=True)),
     path('quiz', AuthenticationMiddleware(views.quiz, optional=True)),
     path('search/<str:word>/', AuthenticationMiddleware(views.search, optional=True)),
+    path('associate/<str:word>/', AuthenticationMiddleware(views.associate, optional=True)),
 ]

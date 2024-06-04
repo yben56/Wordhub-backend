@@ -9,50 +9,23 @@ import json, os
 
 @api_view(['GET'])
 def search(request, word):
-    
-    #word
+    #1. search
     dictionaries = Dictionary.objects.filter(word=word)
     serializer = SearchSerializer(dictionaries, many=True)
     search = serializer.data
 
-    for index in range(len(search)):
-        search[index]['word_prounce'] = 'sounds/ding.mp3'
-        search[index]['probability'] = 6
+    result = []
 
-        search[index]['evaluation'] = {}
-        search[index]['evaluation']['trials'] = 6
-        search[index]['evaluation']['correctness'] = 2
-        search[index]['evaluation']['accuracy'] = '{}%'.format(round((search[index]['evaluation']['correctness'] / search[index]['evaluation']['trials']) * 100))
-    
-    #associate
-    associate = {}
-    for index in range(len(search)):
-        associate.update(json.loads(search[index]['associate']))
+    if len(search):
+        result = [{
+            'word' : search[0]['word'],
+            'word_prounce' : '/sounds/ding.mp3',
+            'result' : search
+        }]
 
-    associate = sorted(associate, key=associate.get, reverse=True)
-
-    dictionaries = Dictionary.objects.filter(word__in=associate[0:10])
-    serializer = SearchSerializer(dictionaries, many=True)
-    associate = serializer.data
-
-    for index in range(len(associate)):
-        associate[index]['word_prounce'] = 'sounds/ding.mp3'
-        associate[index]['probability'] = 6
-
-        associate[index]['evaluation'] = {}
-        associate[index]['evaluation']['trials'] = 6
-        associate[index]['evaluation']['correctness'] = 2
-        associate[index]['evaluation']['accuracy'] = '{}%'.format(round((associate[index]['evaluation']['correctness'] / associate[index]['evaluation']['trials']) * 100))
-
-    #remove associate from dict
-    search = [{k: v for k, v in d.items() if k != "associate"} for d in search]
-    associate = [{k: v for k, v in d.items() if k != "associate"} for d in associate]
-
+    #4. output
     return Response({
         'error' : False,
         'message' : '',
-        'data' : {
-            'search' : search,
-            'associate': associate
-        }
+        'data' : result
     }, status=200)
