@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from ..models import Dictionary
+from ..models import Dictionary,  Search
 from api.serializers.search_serializers import SearchSerializer
 
 from deep_translator import GoogleTranslator
@@ -21,10 +21,12 @@ def search(request, word):
     serializer = SearchSerializer(dictionaries, many=True)
     search = serializer.data
 
-    #4.
-    if len(search):
-        save_word_into_db = 1
+    #4. search record
+    if len(search) and request.user_id:
+        save_search = Search(user_id=request.user_id, search=word)
+        save_search.save()
 
+    #5.
     result = []
 
     if len(search):
@@ -34,7 +36,7 @@ def search(request, word):
             'result' : search
         }]
 
-    #4. output
+    #6. output
     return Response({
         'error' : False,
         'message' : '',

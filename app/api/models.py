@@ -15,7 +15,7 @@ class Dictionary(models.Model):
 #    associate = models.TextField(null=True)
 
 class Quiz(models.Model):
-    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE, db_column='wordid')
+    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
     word = models.CharField(max_length=255, null=False)
     quiz = models.TextField(null=False)
 
@@ -24,12 +24,12 @@ class Frequency(models.Model):
     frequency = models.IntegerField()
 
 class Search(models.Model):
-    userid = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userid')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     search = models.TextField(null=False)
     date = models.DateTimeField(auto_now_add=True)
 
 class Query(models.Model):
-    userid = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userid')
-    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE, db_column='wordid')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
     word = models.CharField(max_length=255, null=False)
     date = models.DateTimeField(auto_now_add=True)
