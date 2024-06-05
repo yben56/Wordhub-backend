@@ -11,11 +11,11 @@ from deep_translator import GoogleTranslator
 
 @api_view(['GET'])
 def associate(request, word):
-    #1. to lowercase
-    word = word.lower()
+    #1. translate to en
+    word = GoogleTranslator(source='auto', target='en').translate(word)
 
-    #2. translate to en
-    word = GoogleTranslator(source='auto', target='en').translate(word) 
+    #2. to lowercase
+    word = word.lower()
 
     #3. word
     dictionaries = Dictionary.objects.filter(word=word)

@@ -10,11 +10,11 @@ from deep_translator import GoogleTranslator
 
 @api_view(['GET'])
 def search(request, word):
-    #1. to lowercase
-    word = word.lower()
-    
-    #2. translate to en
+    #1. translate to en
     word = GoogleTranslator(source='auto', target='en').translate(word) 
+
+    #2. to lowercase
+    word = word.lower()
 
     #3. search
     dictionaries = Dictionary.objects.filter(word=word)
