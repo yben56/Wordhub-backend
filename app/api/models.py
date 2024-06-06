@@ -5,6 +5,7 @@ class Dictionary(models.Model):
     id = models.AutoField(primary_key=True)
     word = models.CharField(max_length=255, null=False)
     phonetic = models.CharField(max_length=255, null=True)
+    heteronyms = models.BooleanField(default=False)
     pos = models.CharField(max_length=30, null=True)
     translation = models.CharField(max_length=255, null=False)
     sentences = models.TextField(null=True)

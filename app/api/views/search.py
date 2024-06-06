@@ -32,7 +32,7 @@ def search(request, word):
     if len(search):
         result = [{
             'word' : search[0]['word'],
-            'word_prounce' : '/sounds/ding.mp3',
+            'heteronyms' : search[0]['heteronyms'],
             'result' : search
         }]
 
