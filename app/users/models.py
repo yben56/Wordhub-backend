@@ -8,6 +8,7 @@ class User(AbstractUser, PermissionsMixin):
     gender = models.BooleanField(blank=False, null=False)
     profile_picture = models.URLField(max_length=200, blank=True, null=True)
     is_active = models.BooleanField(default=False)
+    ban = models.BooleanField(default=False)
 
     username = None
 

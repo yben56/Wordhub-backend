@@ -9,9 +9,9 @@ from api.serializers.search_serializers import SearchSerializer
 from deep_translator import GoogleTranslator
 
 @api_view(['GET'])
-def search(request, word):
+def search(request, text):
     #1. translate to en
-    word = GoogleTranslator(source='auto', target='en').translate(word) 
+    word = GoogleTranslator(source='auto', target='en').translate(text) 
 
     #2. to lowercase
     word = word.lower()
@@ -21,12 +21,18 @@ def search(request, word):
     serializer = SearchSerializer(dictionaries, many=True)
     search = serializer.data
 
-    #4. search record
-    if len(search) and request.user_id:
-        save_search = Search(user_id=request.user_id, search=word)
+    #4. if word exist in db
+    if len(search):
+        exist = True
+    else:
+        exist = False
+
+    #5. search record
+    if request.user_id:
+        save_search = Search(user_id=request.user_id, search=text, word=word, exist=exist)
         save_search.save()
 
-    #5.
+    #6.
     result = []
 
     if len(search):
@@ -36,7 +42,7 @@ def search(request, word):
             'result' : search
         }]
 
-    #6. output
+    #7. output
     return Response({
         'error' : False,
         'message' : '',

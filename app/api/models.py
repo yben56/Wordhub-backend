@@ -27,6 +27,8 @@ class Frequency(models.Model):
 class Search(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     search = models.TextField(null=False)
+    word = models.CharField(max_length=255, null=True)
+    exist = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
 class Query(models.Model):

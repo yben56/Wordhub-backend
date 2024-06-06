@@ -54,7 +54,7 @@ def associate(request, word):
     for item in association:
         output.append({
             'word': item,
-            'word_prounce': '/sounds/ding.mp3',
+            'heteronyms' : False,
             'result': []
         })
 
