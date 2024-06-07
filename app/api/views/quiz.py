@@ -12,21 +12,21 @@ import json, os, random
 @api_view(['GET'])
 def quiz(request):
     #1
-    if not request.user_id:
+    #if not request.user_id:
 
-        #select random 10 quiz
-        word = Quiz.objects.order_by('?')[:2]
-        serializer = QuizSerializer(word, many=True)
-        data = serializer.data
+    #select random 10 quiz
+    word = Quiz.objects.order_by('?')[:2]
+    serializer = QuizSerializer(word, many=True)
+    data = serializer.data
 
-        #data = data['quiz'].apply(shuffle)
-        
+    #data = data['quiz'].apply(shuffle)
+    
 
-        return Response({
-            'error' : False,
-            'message' : '',
-            'data' : data
-        }, status=200)
+    return Response({
+        'error' : False,
+        'message' : '',
+        'data' : data
+    }, status=200)
         
     #select random 10 quiz according to search & query
     
