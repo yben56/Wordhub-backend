@@ -16,11 +16,6 @@ def word(request, word, wordid):
         serializer = DictionarySerializer(word)
         data = serializer.data
 
-        #2. json
-        data['sentences'] = json.loads(data['sentences'])
-        data['associate'] = json.loads(data['associate'])
-
-        data['word_prounce'] = 'sounds/ding.mp3'
         data['probability'] = 6
 
         #3. evaluation (id, wordid, word, trials, correctness)
