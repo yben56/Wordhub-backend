@@ -15,7 +15,7 @@ def quiz(request):
     #if not request.user_id:
 
     #select random 10 quiz
-    word = Quiz.objects.order_by('?')[:2]
+    word = Quiz.objects.order_by('?')[:10]
     serializer = QuizSerializer(word, many=True)
     data = serializer.data
 
