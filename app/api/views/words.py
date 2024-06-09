@@ -3,21 +3,47 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from app.helpers import postman
+from ..models import Dictionary
+from api.serializers.dictionary_serializers import DictionarySerializer
+
 import json, os
 
 @api_view(['GET'])
 def words(request):
-    #1. api
-    #response = postman('GET', 'http://localhost:3000/database/Words.json')
+    #1
+    pages = request.GET.get('pages')
 
-    data = open(os.getcwd() + '/api/database/Words.json', encoding='utf-8')
-    response = json.load(data)
+    if pages is not None:
+        try:
+                pages = int(pages)
+        except ValueError:
+            return Response({
+                'error' : True,
+                'message' : 'Invalid Pages'
+            }
+            , status=status.HTTP_400_BAD_REQUEST)
+    else:
+        pages = 9 
+
+    #2.
+    words = Dictionary.objects.order_by('?')[:pages]
+    serializer = DictionarySerializer(words, many=True)
+    data = serializer.data
+
+    for index in range(len(data)):
+        data[index]['probability'] = 6
+
+        #3. evaluation (id, wordid, word, trials, correctness)
+        if request.user_id:
+            data[index]['evaluation'] = {}
+            data[index]['evaluation']['trials'] = 6
+            data[index]['evaluation']['correctness'] = 2
+            data[index]['evaluation']['accuracy'] = '{}%'.format(round((data[index]['evaluation']['correctness'] / data[index]['evaluation']['trials']) * 100))
 
     #2. resposne
     return Response({
         'error' : False,
         'message' : '',
         'user_id' : request.user_id,
-        'data' : response
+        'data' : data
     }, status=200)
