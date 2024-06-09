@@ -12,10 +12,27 @@ import json, os, random
 @api_view(['GET'])
 def quiz(request):
     #1
+    pages = request.GET.get('pages')
+
+    if pages is not None:
+        try:
+                pages = int(pages)
+        except ValueError:
+            return Response({
+                'error' : True,
+                'message' : 'Invalid Pages'
+            }
+            , status=status.HTTP_400_BAD_REQUEST)
+    else:
+        pages = 1 
+
+
+
     #if not request.user_id:
+ 
 
     #select random 10 quiz
-    word = Quiz.objects.order_by('?')[:10]
+    word = Quiz.objects.order_by('?')[:pages]
     serializer = QuizSerializer(word, many=True)
     data = serializer.data
 
