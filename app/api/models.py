@@ -39,6 +39,9 @@ class SearchWords(models.Model):
 
 class SearchWord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
-    word = models.CharField(max_length=255, null=False)
+    word = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
+    count = models.IntegerField(default=1)
     date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'word')
