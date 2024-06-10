@@ -27,7 +27,20 @@ def words(request):
 
     #2. guest mode
     if request.user_id:
-        data = []
+        ###REPLACE THIS PART WITH ALGORITHM###
+        words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
+        serializer = DictionarySerializer(words, many=True)
+        data = serializer.data
+
+        for index in range(len(data)):
+            data[index]['probability'] = 6
+
+            #3. evaluation (id, wordid, word, trials, correctness)
+            if request.user_id:
+                data[index]['evaluation'] = {}
+                data[index]['evaluation']['trials'] = 6
+                data[index]['evaluation']['correctness'] = 2
+                data[index]['evaluation']['accuracy'] = '{}%'.format(round((data[index]['evaluation']['correctness'] / data[index]['evaluation']['trials']) * 100))
     else:
         words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
         serializer = DictionarySerializer(words, many=True)
