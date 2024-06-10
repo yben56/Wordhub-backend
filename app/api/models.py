@@ -24,14 +24,20 @@ class Frequency(models.Model):
     word = models.CharField(max_length=255, null=False)
     frequency = models.IntegerField()
 
-class Search(models.Model):
+class SearchGuest(models.Model):
+    search = models.TextField(null=False)
+    word = models.CharField(max_length=255, null=True)
+    exist = models.BooleanField(default=False)
+    date = models.DateTimeField(auto_now_add=True)
+
+class SearchWords(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     search = models.TextField(null=False)
     word = models.CharField(max_length=255, null=True)
     exist = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
-class Query(models.Model):
+class SearchWord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
     word = models.CharField(max_length=255, null=False)
