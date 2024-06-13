@@ -10,15 +10,23 @@ class Dictionary(models.Model):
     translation = models.CharField(max_length=255, null=False)
     sentences = models.TextField(null=True)
     associate = models.TextField(null=True)
-
-#class Associate(models.Model):
-#    word = models.CharField(max_length=255, null=False)
-#    associate = models.TextField(null=True)
+    classification = models.TextField(null=True)
 
 class Quiz(models.Model):
-    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
+    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE, db_column='wordid')
     word = models.CharField(max_length=255, null=False)
     quiz = models.TextField(null=False)
+
+class Answer(models.Model):
+    userid = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userid')
+    wordid = models.ForeignKey(Quiz, on_delete=models.CASCADE, db_column='wordid')
+    word = models.CharField(max_length=255, null=False)
+    correct = models.IntegerField(default=0)
+    trials = models.IntegerField(default=0)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('userid', 'wordid')
 
 class Frequency(models.Model):
     word = models.CharField(max_length=255, null=False)
@@ -31,17 +39,17 @@ class SearchGuest(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
 class SearchWords(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    userid = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userid')
     search = models.TextField(null=False)
     word = models.CharField(max_length=255, null=True)
     exist = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
 class SearchWord(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    word = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
+    userid = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userid'
+    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE, db_column='wordid')
     count = models.IntegerField(default=1)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'word')
+        unique_together = ('userid', 'wordid')
