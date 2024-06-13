@@ -29,7 +29,7 @@ def word(request, word, wordid):
         if request.user_id:
             #4. create
             obj, created = SearchWord.objects.update_or_create(
-                user_id=request.user_id, word_id=wordid,
+                user_id=request.user_id, dictionary_id=wordid,
                 defaults={'date': timezone.now()},
             )
 

@@ -13,43 +13,53 @@ class Dictionary(models.Model):
     classification = models.TextField(null=True)
 
 class Quiz(models.Model):
-    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE, db_column='wordid')
+    dictionary = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
     word = models.CharField(max_length=255, null=False)
     quiz = models.TextField(null=False)
 
 class Answer(models.Model):
-    userid = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userid')
-    wordid = models.ForeignKey(Quiz, on_delete=models.CASCADE, db_column='wordid')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     word = models.CharField(max_length=255, null=False)
     correct = models.IntegerField(default=0)
     trials = models.IntegerField(default=0)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('userid', 'wordid')
+        unique_together = ('user', 'quiz')
 
 class Frequency(models.Model):
     word = models.CharField(max_length=255, null=False)
     frequency = models.IntegerField()
 
+#Guest search
 class SearchGuest(models.Model):
     search = models.TextField(null=False)
     word = models.CharField(max_length=255, null=True)
     exist = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'api_search_guest'
+
+#User search word
 class SearchWords(models.Model):
-    userid = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userid')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     search = models.TextField(null=False)
     word = models.CharField(max_length=255, null=True)
     exist = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'api_search_words'
+
+#User enter word
 class SearchWord(models.Model):
-    userid = models.ForeignKey(User, on_delete=models.CASCADE, db_column='userid'
-    wordid = models.ForeignKey(Dictionary, on_delete=models.CASCADE, db_column='wordid')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    dictionary = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
     count = models.IntegerField(default=1)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('userid', 'wordid')
+        db_table = 'api_search_word'
+        unique_together = ('user', 'dictionary')
