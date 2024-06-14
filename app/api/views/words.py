@@ -5,8 +5,7 @@ from rest_framework import status
 
 from ..models import Dictionary
 from api.serializers.dictionary_serializers import DictionarySerializer
-
-import json, os
+from ..utils import calculate_accuracy
 
 @api_view(['GET'])
 def words(request):
@@ -25,7 +24,7 @@ def words(request):
     else:
         pages = 9 
 
-    #2. guest mode
+    #2. user mode
     if request.user_id:
         ###REPLACE THIS PART WITH ALGORITHM###
         words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
@@ -35,12 +34,10 @@ def words(request):
         for index in range(len(data)):
             data[index]['probability'] = 6
 
-            #3. evaluation (id, wordid, word, trials, correctness)
-            if request.user_id:
-                data[index]['evaluation'] = {}
-                data[index]['evaluation']['trials'] = 6
-                data[index]['evaluation']['correctness'] = 2
-                data[index]['evaluation']['accuracy'] = '{}%'.format(round((data[index]['evaluation']['correctness'] / data[index]['evaluation']['trials']) * 100))
+            #3. evaluation
+            data[index]['evaluation'] = calculate_accuracy(request.user_id, data[index]['word'])
+
+    #4. guess mode
     else:
         words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
         serializer = DictionarySerializer(words, many=True)
@@ -48,13 +45,6 @@ def words(request):
 
         for index in range(len(data)):
             data[index]['probability'] = 6
-
-            #3. evaluation (id, wordid, word, trials, correctness)
-            if request.user_id:
-                data[index]['evaluation'] = {}
-                data[index]['evaluation']['trials'] = 6
-                data[index]['evaluation']['correctness'] = 2
-                data[index]['evaluation']['accuracy'] = '{}%'.format(round((data[index]['evaluation']['correctness'] / data[index]['evaluation']['trials']) * 100))
 
     #2. resposne
     return Response({

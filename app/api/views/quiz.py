@@ -11,32 +11,32 @@ import json, os, random
 
 @api_view(['GET'])
 def quiz(request):
-    #1
+    #1. pages
     pages = request.GET.get('pages')
 
     if pages is not None:
         try:
-                pages = int(pages)
+            pages = int(pages)
         except ValueError:
             return Response({
                 'error' : True,
                 'message' : 'Invalid Pages'
-            }
-            , status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_400_BAD_REQUEST)
     else:
         pages = 1 
 
-
-
-    #if not request.user_id:
- 
-
-    #select random 10 quiz
+    
+    #2. select quiz
     word = Quiz.objects.order_by('?')[:pages]
     serializer = QuizSerializer(word, many=True)
     data = serializer.data
 
-    #data = data['quiz'].apply(shuffle)
+    #3. user mode (evaluation)
+    if request.user_id:
+        from ..utils import calculate_accuracy
+
+        for index in range(len(data)):
+            data[index]['evaluation'] = calculate_accuracy(request.user_id, data[index]['word'])
     
 
     return Response({
