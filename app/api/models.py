@@ -19,14 +19,14 @@ class Quiz(models.Model):
 
 class Answer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    dictionary = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
     word = models.CharField(max_length=255, null=False)
     correct = models.IntegerField(default=0)
     trials = models.IntegerField(default=0)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'quiz')
+        unique_together = ('user', 'dictionary')
 
 class Frequency(models.Model):
     word = models.CharField(max_length=255, null=False)
