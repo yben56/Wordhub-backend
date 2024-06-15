@@ -10,7 +10,7 @@ urlpatterns = [
     path('word/<str:word>/<int:wordid>/', AuthenticationMiddleware(views.word, optional=True)),
     path('words', AuthenticationMiddleware(views.words, optional=True)),
 
-    #User
-    path('answer', AuthenticationMiddleware(views.answer, optional=True)),
-    path('history/', AuthenticationMiddleware(views.associate, optional=True)),
+    #User Only
+    path('answer', AuthenticationMiddleware(views.answer, optional=False)),
+    path('history', AuthenticationMiddleware(views.history, optional=False)),
 ]
