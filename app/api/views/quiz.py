@@ -24,7 +24,6 @@ def quiz(request):
             }, status=status.HTTP_400_BAD_REQUEST)
     else:
         pages = 1 
-
     
     #2. select quiz
     word = Quiz.objects.order_by('?')[:pages]

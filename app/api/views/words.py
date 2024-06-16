@@ -24,29 +24,40 @@ def words(request):
     else:
         pages = 9 
 
-    #2. user mode
+    #2. classification
+    classification = request.GET.get('classification')
+
+    #3. user mode
     if request.user_id:
         ###REPLACE THIS PART WITH ALGORITHM###
-        words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
+        words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
+
+        if classification is not None:
+            words = words.filter(classification__contains=classification.lower()).order_by('?')[:pages]
+
         serializer = DictionarySerializer(words, many=True)
         data = serializer.data
 
         for index in range(len(data)):
             data[index]['probability'] = 6
 
-            #3. evaluation
+            #4. evaluation
             data[index]['evaluation'] = calculate_accuracy(request.user_id, data[index]['word'])
 
-    #4. guess mode
+    #5. guess mode
     else:
-        words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
+        words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
+
+        if classification is not None:
+            words = words.filter(classification__contains=classification.lower()).order_by('?')[:pages]
+
         serializer = DictionarySerializer(words, many=True)
         data = serializer.data
 
         for index in range(len(data)):
             data[index]['probability'] = 6
 
-    #2. resposne
+    #6. resposne
     return Response({
         'error' : False,
         'message' : '',
