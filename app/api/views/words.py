@@ -30,10 +30,11 @@ def words(request):
     #3. user mode
     if request.user_id:
         ###REPLACE THIS PART WITH ALGORITHM###
-        words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
-
         if classification is not None:
+            words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
             words = words.filter(classification__contains=classification.lower()).order_by('?')[:pages]
+        else:
+            words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
 
         serializer = DictionarySerializer(words, many=True)
         data = serializer.data
@@ -46,10 +47,11 @@ def words(request):
 
     #5. guess mode
     else:
-        words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
-
         if classification is not None:
+            words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
             words = words.filter(classification__contains=classification.lower()).order_by('?')[:pages]
+        else:
+            words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
 
         serializer = DictionarySerializer(words, many=True)
         data = serializer.data
