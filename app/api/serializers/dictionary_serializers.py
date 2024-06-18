@@ -12,11 +12,25 @@ class DictionarySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_sentences(self, obj):
-        return json.loads(obj.sentences)
+        if obj.sentences:
+            try:
+                return json.loads(obj.sentences)
+            except json.JSONDecodeError:
+                return []
+        return []
     
     def get_associate(self, obj):
-        return json.loads(obj.associate)
+        if obj.associate:
+            try:
+                return json.loads(obj.associate)
+            except json.JSONDecodeError:
+                return {}
+        return {}
     
     def get_classification(self, obj):
-        return json.loads(obj.classification)
-    
+        if obj.classification:
+            try:
+                return json.loads(obj.classification)
+            except json.JSONDecodeError:
+                return []
+        return []
