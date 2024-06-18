@@ -6,6 +6,8 @@ from rest_framework import status
 from ..models import Dictionary, SearchWord
 from api.serializers.dictionary_serializers import DictionarySerializer
 
+import json
+
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def openedit(request, word=None, wordid=None):
     #1. method
@@ -62,15 +64,20 @@ def openedit_POST(user_id, request):
 def openedit_PUT(user_id, request, word, wordid):
 
     return {
-        'error' : False,
-        'message' : '',
-        'data' : [user_id, word, wordid]
+        'status' : 200,
+        'body' : {
+            'error' : False,
+            'message' : '',
+            'data' : json.loads(request.body)
+        }
     }
 
 def openedit_DELETE(user_id, request, word, wordid):
 
     return {
-        'error' : False,
-        'message' : '',
-        'data' : [user_id,word, wordid]
+        'status' : 200,
+        'body' : {
+            'error' : False,
+            'message' : ''
+        }
     }
