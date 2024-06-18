@@ -5,6 +5,7 @@ import json
 class DictionarySerializer(serializers.ModelSerializer):
     sentences = serializers.SerializerMethodField()
     associate = serializers.SerializerMethodField()
+    classification = serializers.SerializerMethodField()
 
     class Meta:
         model = Dictionary
@@ -15,4 +16,7 @@ class DictionarySerializer(serializers.ModelSerializer):
     
     def get_associate(self, obj):
         return json.loads(obj.associate)
+    
+    def get_classification(self, obj):
+        return json.loads(obj.classification)
     
