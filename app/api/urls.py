@@ -15,4 +15,6 @@ urlpatterns = [
     path('history', AuthenticationMiddleware(views.history, optional=False)),
     path('openedit', AuthenticationMiddleware(views.openedit, optional=False)),
     path('openedit/<str:word>/<int:wordid>', AuthenticationMiddleware(views.openedit, optional=False)),
+
+    path('dictionarylist/<str:type>', views.dictionarylist),
 ]

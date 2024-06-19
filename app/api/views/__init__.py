@@ -1,5 +1,6 @@
 from .answer import answer
 from .associate import associate
+from .dictionarylist import dictionarylist
 from .history import history
 from .openedit import openedit
 from .quiz import quiz
