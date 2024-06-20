@@ -5,10 +5,10 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 import os, json
 
-from ..models import Dictionary
-from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer
+from ..models import Quiz
+from api.serializers.quiz_serializers import QuizSerializer
 
-@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@api_view(['GET', 'POST', 'PUT'])
 def openedit_quiz(request, word=None, wordid=None):
     #1. method
     method_name = f"openedit_{request.method}"
@@ -21,19 +21,20 @@ def openedit_quiz(request, word=None, wordid=None):
     if word is None and wordid is None:
         output = method(user_id, request)
     
-    #4. GET, PUT, DELETE
+    #4. GET, PUT
     output = method(user_id, request, word, wordid)
 
     return Response(output['body'], status=output['status'])
 
 def openedit_GET(user_id, request, word, wordid):
+
     try:
         #1. fetch
-        fetchword = Dictionary.objects.get(word=word, id=wordid)
-        serializer = DictionarySerializer(fetchword)
+        fetchword = Quiz.objects.get(word=word, dictionary_id=wordid)
+        serializer = QuizSerializer(fetchword)
         data = serializer.data
 
-    except Dictionary.DoesNotExist:
+    except Quiz.DoesNotExist:
         #2. if no match
         return {
             'status' : status.HTTP_404_NOT_FOUND,
@@ -42,8 +43,8 @@ def openedit_GET(user_id, request, word, wordid):
                 'message': _('Page not found.')
             }
         }
-            
-    #3. output word
+    
+    #3. output quiz
     return {
         'status' : status.HTTP_200_OK,
         'body' : {
