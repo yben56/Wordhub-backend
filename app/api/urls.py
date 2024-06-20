@@ -13,8 +13,12 @@ urlpatterns = [
     #User Only
     path('answer', AuthenticationMiddleware(views.answer, optional=False)),
     path('history', AuthenticationMiddleware(views.history, optional=False)),
-    path('openedit', AuthenticationMiddleware(views.openedit, optional=False)),
-    path('openedit/<str:word>/<int:wordid>', AuthenticationMiddleware(views.openedit, optional=False)),
+    
+    #Openedit GET, PUT
+    path('openedit/word/<str:word>/<int:wordid>', AuthenticationMiddleware(views.openedit_word, optional=False)),
+    path('openedit/quiz/<str:word>/<int:wordid>', AuthenticationMiddleware(views.openedit_quiz, optional=False)),
+
+    #path('openedit', AuthenticationMiddleware(views.openedit_word, optional=False)),
 
     path('dictionarylist/<str:type>', views.dictionarylist),
 ]

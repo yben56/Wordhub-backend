@@ -2,7 +2,8 @@ from .answer import answer
 from .associate import associate
 from .dictionarylist import dictionarylist
 from .history import history
-from .openedit import openedit
+from .openedit_word import openedit_word
+from .openedit_quiz import openedit_quiz
 from .quiz import quiz
 from .search import search
 from .word import word

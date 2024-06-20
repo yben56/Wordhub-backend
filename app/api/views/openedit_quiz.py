@@ -9,7 +9,7 @@ from ..models import Dictionary
 from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def openedit(request, word=None, wordid=None):
+def openedit_quiz(request, word=None, wordid=None):
     #1. method
     method_name = f"openedit_{request.method}"
     method = globals().get(method_name, openedit_GET)
