@@ -6,7 +6,7 @@ class DictionarySerializer(serializers.ModelSerializer):
     sentences = serializers.SerializerMethodField()
     associate = serializers.SerializerMethodField()
     classification = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = Dictionary
         fields = '__all__'
@@ -34,3 +34,21 @@ class DictionarySerializer(serializers.ModelSerializer):
             except json.JSONDecodeError:
                 return []
         return []
+    
+class DictionaryUpdateSerializer(serializers.ModelSerializer):
+    sentences = serializers.JSONField()
+    classification = serializers.JSONField()
+    
+    class Meta:
+        model = Dictionary
+        fields = '__all__'
+    
+    def update(self, instance, validated_data):
+
+        if 'classification' in validated_data:
+            instance.classification = json.dumps(validated_data.pop('classification'))
+        
+        if 'sentences' in validated_data:
+            instance.sentences = json.dumps(validated_data.pop('sentences'))
+                
+        return super().update(instance, validated_data)

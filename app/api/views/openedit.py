@@ -5,8 +5,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 import os, json
 
-from ..models import Dictionary, SearchWord
-from api.serializers.dictionary_serializers import DictionarySerializer
+from ..models import Dictionary
+from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def openedit(request, word=None, wordid=None):
@@ -84,7 +84,7 @@ def openedit_PUT(user_id, request, word, wordid):
             'status' : status.HTTP_404_NOT_FOUND,
             'body' : { 'error' : True, 'message' : _('Page not found.') }
         }
-    serializer = DictionarySerializer(fetchword, data=data)
+    serializer = DictionaryUpdateSerializer(fetchword, data=data)
     
     if not serializer.is_valid():
         return {
