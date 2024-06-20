@@ -72,43 +72,18 @@ def openedit_PUT(user_id, request, word, wordid):
             'body' : { 'error' : True, 'message' : data['message'] }
         }
     else:
-        data = data['body']
+        data = json.dumps(data['body'], ensure_ascii=False)
 
-    #2. don't change word (it pair with id!!!)
-    data['word'] = word
-
-    #3. update
+    #2. update
     try:
-        fetchword = Dictionary.objects.get(word=word, id=wordid)
-    except Dictionary.DoesNotExist:
+        Quiz.objects.filter(word=word, dictionary_id=wordid).update(quiz=data)
+    except Quiz.DoesNotExist:
         return {
             'status' : status.HTTP_404_NOT_FOUND,
             'body' : { 'error' : True, 'message' : _('Page not found.') }
         }
-    serializer = DictionaryUpdateSerializer(fetchword, data=data)
     
-    if not serializer.is_valid():
-        return {
-            'status' : status.HTTP_400_BAD_REQUEST,
-            'body' : {
-                'error' : False,
-                'message' : serializer.errors
-            }
-        }
-
-    serializer.save()
-
-    #4. output
-    return {
-        'status' : status.HTTP_200_OK,
-        'body' : {
-            'error' : False,
-            'message' : ''
-        }
-    }
-
-def openedit_DELETE(user_id, request, word, wordid):
-
+    #3. output
     return {
         'status' : status.HTTP_200_OK,
         'body' : {
@@ -126,48 +101,12 @@ def opedit_validation(body):
     except Exception as e:
         return { 'error' : True, 'message' : str(e) }
     
-    #2. if missing field in body:
-    if not all(key in body for key in ['translation', 'phonetic', 'pos', 'translation', 'sentences']):
-        return { 'error' : True, 'message' : "body required: ['translation', 'phonetic', 'pos', 'translation', 'sentences']" }
-    
-    #3. check list
-    if not type(body['classification']) is list:
-        return { 'error' : True, 'message' : 'classification must be list' }
+    #2. check elements
+    if len(body) != 4:
+        return { 'error' : True, 'message' : 'Array required 4 elements' }
 
-    if  not type(body['sentences']) is list:
-        return { 'error' : True, 'message' : 'sentences must be list' }
-
-    #4. load pos & classification json
-    with open(os.path.join(settings.BASE_DIR, 'api/dictionarylist/', 'pos.json'), 'r', encoding='utf-8') as f:
-        pos_list = json.load(f)
-
-    with open(os.path.join(settings.BASE_DIR, 'api/dictionarylist/zh-tw/', 'classification.json'), 'r', encoding='utf-8') as f:
-        classification_list = json.load(f)
-
-    #5. check pos
-    if body['pos'] not in pos_list:
-       return { 'error' : True, 'message' : 'pos must from list we provided' }
-    
-    #6. check classification
-    for classification in body['classification']:
-        if classification not in classification_list:
-            return { 'error' : True, 'message' : 'classification must from dict we provided' }
-    
-    #7. check sentences
-    for sentence in body['sentences']:
-        if not isinstance(sentence, dict):
-            return { 'error' : True, 'message' : 'Invalid sentences format' }
-        if 'en' not in sentence or 'zh' not in sentence:
-            return { 'error' : True, 'message' : 'Invalid sentences format' }
-
-    #8. out only fields we want
+    #3. out only fields we want
     return {
         'error' : False,
-        'body' : {
-            'translation' : body['translation'],
-            'phonetic' : body['phonetic'],
-            'pos' : body['pos'],
-            'classification' : body['classification'],
-            'sentences' : body['sentences']
-        }
+        'body' : body
     }
