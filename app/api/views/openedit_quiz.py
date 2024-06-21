@@ -100,12 +100,31 @@ def opedit_validation(body):
         return { 'error' : True, 'message' : 'Invalid JSON format' }
     except Exception as e:
         return { 'error' : True, 'message' : str(e) }
-    
+
     #2. check elements
     if len(body) != 4:
         return { 'error' : True, 'message' : 'Array required 4 elements' }
+    
+    #3. check each items contain 3 elements
+    for i, item in enumerate(body):
+        if len(item) != 3:
+            return { 'error' : True, 'message' : 'Each items required 3 elements' }
 
-    #3. out only fields we want
+    #4. check elements format [str, str, boolean]
+    for i, item in enumerate(body):
+        if not isinstance(item[0], str) or not isinstance(item[1], str) or not isinstance(item[2], bool):
+            return { 'error' : True, 'message' : 'Each elements required in [str, str, boolean] format' }
+
+    #5. check item contain 1 ture 3 false
+    true_count = 0
+    for i, item in enumerate(body):
+        if item[2]:
+            true_count += 1
+
+    if true_count != 1:
+        return { 'error' : True, 'message' : 'item required 1 ture 3 false' }
+
+    #6. out only fields we want
     return {
         'error' : False,
         'body' : body
