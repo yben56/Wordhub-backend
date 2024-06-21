@@ -49,6 +49,6 @@ class DictionaryUpdateSerializer(serializers.ModelSerializer):
             instance.classification = json.dumps(validated_data.pop('classification'))
         
         if 'sentences' in validated_data:
-            instance.sentences = json.dumps(validated_data.pop('sentences'))
+            instance.sentences = json.dumps(validated_data.pop('sentences'), ensure_ascii=False)
                 
         return super().update(instance, validated_data)

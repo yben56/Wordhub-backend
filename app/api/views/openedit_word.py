@@ -8,7 +8,7 @@ import os, json
 from ..models import Dictionary
 from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer
 
-@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@api_view(['GET', 'POST', 'PUT'])
 def openedit_word(request, word=None, wordid=None):
     #1. method
     method_name = f"openedit_{request.method}"
@@ -106,16 +106,6 @@ def openedit_PUT(user_id, request, word, wordid):
         }
     }
 
-def openedit_DELETE(user_id, request, word, wordid):
-
-    return {
-        'status' : status.HTTP_200_OK,
-        'body' : {
-            'error' : False,
-            'message' : ''
-        }
-    }
-
 def opedit_validation(body):
     #1. check request body
     try:
@@ -158,7 +148,7 @@ def opedit_validation(body):
             return { 'error' : True, 'message' : 'Invalid sentences format' }
         if 'en' not in sentence or 'zh' not in sentence:
             return { 'error' : True, 'message' : 'Invalid sentences format' }
-
+        
     #8. out only fields we want
     return {
         'error' : False,
