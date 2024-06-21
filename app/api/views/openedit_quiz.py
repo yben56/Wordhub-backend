@@ -1,9 +1,10 @@
 from django.utils.translation import gettext as _
 from django.conf import settings
+from django.db import IntegrityError
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-import os, json
+import json
 
 from ..models import Quiz
 from api.serializers.quiz_serializers import QuizSerializer
@@ -76,11 +77,16 @@ def openedit_PUT(user_id, request, word, wordid):
 
     #2. update
     try:
-        Quiz.objects.filter(word=word, dictionary_id=wordid).update(quiz=data)
-    except Quiz.DoesNotExist:
+        #update
+        row = Quiz.objects.filter(dictionary_id=wordid).update(quiz=data)
+        #create
+        if row == 0:
+            Quiz.objects.create(word=word, dictionary_id=wordid, quiz=data)
+
+    except IntegrityError:
         return {
-            'status' : status.HTTP_404_NOT_FOUND,
-            'body' : { 'error' : True, 'message' : _('Page not found.') }
+            'status': status.HTTP_404_NOT_FOUND,
+            'body': {'error': True, 'message': _('Page not found.')}
         }
     
     #3. output
