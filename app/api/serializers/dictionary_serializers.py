@@ -36,8 +36,8 @@ class DictionarySerializer(serializers.ModelSerializer):
         return []
     
 class DictionaryUpdateSerializer(serializers.ModelSerializer):
-    sentences = serializers.JSONField()
     classification = serializers.JSONField()
+    sentences = serializers.JSONField()
     
     class Meta:
         model = Dictionary
@@ -52,3 +52,24 @@ class DictionaryUpdateSerializer(serializers.ModelSerializer):
             instance.sentences = json.dumps(validated_data.pop('sentences'), ensure_ascii=False)
                 
         return super().update(instance, validated_data)
+    
+class DictionaryPostSerializer(serializers.ModelSerializer):
+    classification = serializers.JSONField()
+    sentences = serializers.JSONField()
+
+    class Meta:
+        model = Dictionary
+        fields = '__all__'
+
+    def create(self, validated_data):
+
+        classification_data = json.dumps(validated_data.pop('classification', []))
+        
+        sentences_data = json.dumps(validated_data.pop('sentences', []))
+
+        dictionary_instance = Dictionary.objects.create(**validated_data)
+        dictionary_instance.classification = classification_data
+        dictionary_instance.sentences = sentences_data
+        dictionary_instance.save()
+
+        return dictionary_instance

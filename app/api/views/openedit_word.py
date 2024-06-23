@@ -6,7 +6,9 @@ from rest_framework import status
 import os, json
 
 from ..models import Dictionary
-from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer
+from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer, DictionaryPostSerializer
+
+from text_to_speech import save
 
 @api_view(['GET', 'POST', 'PUT'])
 def openedit_word(request, word=None, wordid=None):
@@ -18,11 +20,11 @@ def openedit_word(request, word=None, wordid=None):
     user_id = request.user_id
     
     #3. POST (add new word)
-    if word is None and wordid is None:
+    if request.method == 'POST':
         output = method(user_id, request)
-    
-    #4. GET, PUT, DELETE
-    output = method(user_id, request, word, wordid)
+    else:
+        #4. GET, PUT
+        output = method(user_id, request, word, wordid)
 
     return Response(output['body'], status=output['status'])
 
@@ -54,11 +56,44 @@ def openedit_GET(user_id, request, word, wordid):
     }
 
 def openedit_POST(user_id, request):
+    #1. validation
+    data = opedit_validation(request.body)
 
+    if data['error']:
+        return {
+            'status' : status.HTTP_400_BAD_REQUEST,
+            'body' : { 'error' : True, 'message' : data['message'] }
+        }
+    else:
+        data = data['body']
+    
+    #2. check 'word & pos & translation' db exist
+    exists = Dictionary.objects.filter(word=data['word'], pos=data['pos'], translation=data['translation']).exists()
+
+    if exists:
+        return {
+            'status' : status.HTTP_404_NOT_FOUND,
+            'body' : { 'error' : True, 'message' : _('Word already exist.') }
+        }
+
+    #3.
+    serializer = DictionaryPostSerializer(data=data)
+    if not serializer.is_valid():
+        return {
+            'status' : status.HTTP_400_BAD_REQUEST,
+            'body' : { 'error' : True, 'message' : serializer.errors }
+        }
+
+    serializer.save()
+
+    #4. Pronounce
+    pronounce_path = os.environ.get('PRONOUNCE_PATH', 'PRONOUNCE_PATH not found')
+    filename = f"{pronounce_path}/{data['word']}.mp3"
+    save(data['word'], 'en', file=filename)
+    
     return {
-        'error' : False,
-        'message' : '',
-        'data' : user_id
+        'status' : status.HTTP_200_OK,
+        'body' : { 'error' : False, 'message' : '' }
     }
 
 def openedit_PUT(user_id, request, word, wordid):
@@ -72,7 +107,7 @@ def openedit_PUT(user_id, request, word, wordid):
         }
     else:
         data = data['body']
-
+    
     #2. don't change word (it pair with id!!!)
     data['word'] = word
 
@@ -116,43 +151,48 @@ def opedit_validation(body):
         return { 'error' : True, 'message' : str(e) }
     
     #2. if missing field in body:
-    if not all(key in body for key in ['translation', 'phonetic', 'pos', 'translation', 'sentences']):
+    if not all(key in body for key in ['word', 'translation', 'phonetic', 'pos', 'translation', 'sentences']):
         return { 'error' : True, 'message' : "body required: ['translation', 'phonetic', 'pos', 'translation', 'sentences']" }
     
-    #3. check list
+    #3. check word & translation not null
+    if body['word'] == '' or body['translation'] == '':
+        return { 'error' : True, 'message' : "word & translation must not null" }
+    
+    #4. check list
     if not type(body['classification']) is list:
         return { 'error' : True, 'message' : 'classification must be list' }
 
     if  not type(body['sentences']) is list:
         return { 'error' : True, 'message' : 'sentences must be list' }
 
-    #4. load pos & classification json
+    #5. load pos & classification json
     with open(os.path.join(settings.BASE_DIR, 'api/dictionarylist/', 'pos.json'), 'r', encoding='utf-8') as f:
         pos_list = json.load(f)
 
     with open(os.path.join(settings.BASE_DIR, 'api/dictionarylist/zh-tw/', 'classification.json'), 'r', encoding='utf-8') as f:
         classification_list = json.load(f)
-
-    #5. check pos
+    
+    #6. check pos
     if body['pos'] not in pos_list:
        return { 'error' : True, 'message' : 'pos must from list we provided' }
     
-    #6. check classification
+    #7. check classification
     for classification in body['classification']:
         if classification not in classification_list:
             return { 'error' : True, 'message' : 'classification must from dict we provided' }
     
-    #7. check sentences
+    #8. check sentences
     for sentence in body['sentences']:
         if not isinstance(sentence, dict):
             return { 'error' : True, 'message' : 'Invalid sentences format' }
         if 'en' not in sentence or 'zh' not in sentence:
             return { 'error' : True, 'message' : 'Invalid sentences format' }
-        
-    #8. out only fields we want
+     
+    #9. out only fields we want
     return {
         'error' : False,
         'body' : {
+            'word' : body['word'],
             'translation' : body['translation'],
             'phonetic' : body['phonetic'],
             'pos' : body['pos'],

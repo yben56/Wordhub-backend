@@ -17,8 +17,8 @@ urlpatterns = [
     #Openedit GET, PUT
     path('openedit/word/<str:word>/<int:wordid>', AuthenticationMiddleware(views.openedit_word, optional=False)),
     path('openedit/quiz/<str:word>/<int:wordid>', AuthenticationMiddleware(views.openedit_quiz, optional=False)),
-
-    #path('openedit', AuthenticationMiddleware(views.openedit_word, optional=False)),
+    #Openedit Post
+    path('openedit/word', AuthenticationMiddleware(views.openedit_word, optional=False)),
 
     path('dictionarylist/<str:type>', views.dictionarylist),
 ]
