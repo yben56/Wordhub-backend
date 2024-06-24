@@ -52,7 +52,14 @@ def login(request):
             'message' : _('This email address has been registered but has not been confirmed yet. Please reconfirm your email')
         }, status=status.HTTP_403_FORBIDDEN)
     
-    #6. token
+    #6. ban
+    if not user.ban:
+        return Response({
+            'error': True,
+            'message' : _('This account has been banned. If you have any questions, please contact the administrator')
+        }, status=status.HTTP_403_FORBIDDEN)
+    
+    #7. token
     access_token = create_token(user.id, os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'), 720)
     refresh_token = create_token(user.id, os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET not found'), 720)
 

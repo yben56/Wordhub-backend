@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-27 01:25+0800\n"
+"POT-Creation-Date: 2024-06-24 20:13+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,56 +17,72 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\users\views\email_confirmation.py:47
+#: .\api\views\openedit_quiz.py:44 .\api\views\openedit_quiz.py:89
+#: .\api\views\openedit_word.py:44 .\api\views\openedit_word.py:120
+#: .\api\views\word.py:21 .\api\views\word.py:56
+msgid "Page not found."
+msgstr ""
+
+#: .\api\views\openedit_word.py:76
+msgid "Word already exist."
+msgstr ""
+
+#: .\users\views\email_confirmation.py:44
 #, fuzzy
 #| msgid "We could not find this email address"
 msgid "We could not find this email address."
 msgstr "查無此Email"
 
-#: .\users\views\email_confirmation.py:53
+#: .\users\views\email_confirmation.py:50
 #, fuzzy
 #| msgid "This email address is already in use"
 msgid "This email address has already confirmed."
 msgstr "該電子郵件地址已確認"
 
-#: .\users\views\email_confirmation.py:62
+#: .\users\views\email_confirmation.py:59
 msgid "Email confirm successfully. Please login again."
 msgstr "郵件確認成功, 請重新登入"
 
-#: .\users\views\email_confirmation.py:82 .\users\views\reset_password.py:40
+#: .\users\views\email_confirmation.py:79 .\users\views\reset_password.py:36
 msgid "We could not find this email address"
 msgstr "查無此Email"
 
-#: .\users\views\email_confirmation.py:94 .\users\views\signup.py:70
+#: .\users\views\email_confirmation.py:91 .\users\views\signup.py:65
 msgid "Please confirm your email by clicking on the following link:"
 msgstr "請點擊以下連結確認您的Email："
 
-#: .\users\views\email_confirmation.py:97 .\users\views\signup.py:73
-#: .\users\views\signup.py:88
+#: .\users\views\email_confirmation.py:94 .\users\views\signup.py:68
+#: .\users\views\signup.py:83
 msgid "Please confirm your email"
 msgstr "請確認你的Email"
 
-#: .\users\views\email_confirmation.py:112
+#: .\users\views\email_confirmation.py:109
 msgid "Email confirmation has send"
 msgstr "Email確認信已重新發送"
 
-#: .\users\views\login.py:40 .\users\views\login.py:47
+#: .\users\views\login.py:38 .\users\views\login.py:45
 msgid "Invalid Email or Password"
 msgstr "Email或密碼錯誤"
 
-#: .\users\views\login.py:54 .\users\views\signup.py:35
+#: .\users\views\login.py:52 .\users\views\signup.py:32
 msgid ""
 "This email address has been registered but has not been confirmed yet. "
 "Please reconfirm your email"
 msgstr "此Email已經被註冊，但尚未確認，請重新確認您的Email"
 
-#: .\users\views\reset_password.py:50
+#: .\users\views\login.py:59
+msgid ""
+"This account has been banned. If you have any questions, please contact the "
+"administrator"
+msgstr "此帳號已被封禁，如有任何疑問，請聯繫管理員"
+
+#: .\users\views\reset_password.py:46
 msgid ""
 "In the past hour, a password reset request has already been submitted, and "
 "therefore cannot be submitted again temporarily."
 msgstr "在最近一小時內已經提交重置密碼請求，暫時無法再次提交"
 
-#: .\users\views\reset_password.py:61
+#: .\users\views\reset_password.py:58
 msgid ""
 "You are receiving this email because you requested to reset your password. "
 "If you did not make this request, you can ignore this email.\n"
@@ -74,18 +90,18 @@ msgid ""
 "To reset your password, please click on the following link:"
 msgstr "若要重設您的密碼，請點擊以下連結："
 
-#: .\users\views\reset_password.py:79
+#: .\users\views\reset_password.py:76
 msgid "Reset Password link has send to your email."
 msgstr "重設密碼連結已傳送到您的電子郵件"
 
-#: .\users\views\reset_password.py:157
+#: .\users\views\reset_password.py:144
 msgid "Can not find Reset Password request or this link already been used."
 msgstr "找不到重置密碼請求或此連結已被使用"
 
-#: .\users\views\reset_password.py:170
+#: .\users\views\reset_password.py:160
 msgid "Password has been updated."
 msgstr "密碼已更新"
 
-#: .\users\views\signup.py:42
+#: .\users\views\signup.py:39
 msgid "This email address is already in use"
 msgstr "該Email已經註冊"
