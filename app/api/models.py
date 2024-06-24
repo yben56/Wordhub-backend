@@ -11,11 +11,45 @@ class Dictionary(models.Model):
     sentences = models.TextField(null=True)
     associate = models.TextField(null=True)
     classification = models.TextField(null=True)
+    auther = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+    deleted = models.BooleanField(default=False)
+
+class DictionaryVersion(models.Model):
+    id = models.AutoField(primary_key=True)
+    dictionary = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
+    word = models.CharField(max_length=255, null=False)
+    phonetic = models.CharField(max_length=255, null=True)
+    heteronyms = models.BooleanField(default=False)
+    pos = models.CharField(max_length=30, null=True)
+    translation = models.CharField(max_length=255, null=False)
+    sentences = models.TextField(null=True)
+    associate = models.TextField(null=True)
+    classification = models.TextField(null=True)
+    auther = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'api_dictionary_version'
 
 class Quiz(models.Model):
     dictionary = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
     word = models.CharField(max_length=255, null=False)
     quiz = models.TextField(null=False)
+    auther = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+    deleted = models.BooleanField(default=False)
+
+class QuizVersion(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    dictionary = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
+    word = models.CharField(max_length=255, null=False)
+    quiz = models.TextField(null=False)
+    auther = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'api_quiz_version'
 
 class Answer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
