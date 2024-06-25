@@ -1,15 +1,16 @@
 from django.utils.translation import gettext as _
 from django.conf import settings
 from django.db import IntegrityError
+from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 import json
 
 from ..models import Quiz
-from api.serializers.quiz_serializers import QuizSerializer
+from api.serializers.quiz_serializers import QuizSerializer, QuizUpdateSerializer, QuizVersionSerializer
 
-@api_view(['GET', 'POST', 'PUT'])
+@api_view(['GET', 'PUT'])
 def openedit_quiz(request, word=None, wordid=None):
     #1. method
     method_name = f"openedit_{request.method}"
@@ -55,14 +56,6 @@ def openedit_GET(user_id, request, word, wordid):
         }
     }
 
-def openedit_POST(user_id, request):
-
-    return {
-        'error' : False,
-        'message' : '',
-        'data' : user_id
-    }
-
 def openedit_PUT(user_id, request, word, wordid):
     #1. validation body
     data = opedit_validation(request.body)
@@ -72,24 +65,91 @@ def openedit_PUT(user_id, request, word, wordid):
             'status' : status.HTTP_400_BAD_REQUEST,
             'body' : { 'error' : True, 'message' : data['message'] }
         }
-    else:
-        data = json.dumps(data['body'], ensure_ascii=False)
-
-    #2. update
-    try:
-        #update
-        row = Quiz.objects.filter(dictionary_id=wordid).update(quiz=data)
-        #create
-        if row == 0:
-            Quiz.objects.create(word=word, dictionary_id=wordid, quiz=data)
-
-    except IntegrityError:
-        return {
-            'status': status.HTTP_404_NOT_FOUND,
-            'body': {'error': True, 'message': _('Page not found.')}
-        }
     
-    #3. output
+    data = data['body']
+
+    #2. get data from db
+    quiz = Quiz.objects.filter(dictionary_id=wordid).first()
+    quiz_serializer = QuizSerializer(quiz)
+
+    #4.
+    if quiz:
+        #UPDATE
+
+        #5. check user update content or not
+        sorted_data = sorted(data, key=lambda x: (x[0], x[1], x[2]))
+        sorted_quiz = sorted(quiz_serializer.data['quiz'], key=lambda x: (x[0], x[1], x[2]))
+        
+        if sorted_data == sorted_quiz:
+            return {
+                'status' : status.HTTP_400_BAD_REQUEST,
+                'body' : {
+                    'error' : True,
+                    'message' : 'update data == db data'
+                }
+            }
+
+        #6. update quiz version
+        quiz_version_serializer = QuizVersionSerializer(data={
+            'dictionary' : quiz_serializer.data['dictionary'],
+            'word' : quiz_serializer.data['word'],
+            'quiz' : quiz_serializer.data['quiz'],
+            'auther' : quiz_serializer.data['auther']
+        })
+
+        if not quiz_version_serializer.is_valid():
+            return {
+                'status': status.HTTP_404_NOT_FOUND,
+                'body': {
+                    'error': True, 
+                    'message': quiz_version_serializer.errors
+                }
+            }
+
+        #7. update quiz
+        serializer = QuizUpdateSerializer(quiz, data={
+            'dictionary' : quiz_serializer.data['dictionary'],
+            'word' : quiz_serializer.data['word'],
+            'quiz' : data,
+            'auther' : user_id
+        })
+
+        if not serializer.is_valid():
+            return {
+                'status': status.HTTP_404_NOT_FOUND,
+                'body': {
+                    'error': True, 
+                    'message': serializer.errors
+                }
+            }
+
+        #8. transaction
+        with transaction.atomic():
+            quiz_version_serializer.save()
+            serializer.save()
+
+    else:
+        #INSERT
+        #9. insert quiz
+        serializer = QuizUpdateSerializer(data={
+            'dictionary': wordid,
+            'word': word,
+            'quiz': data,
+            'auther': user_id
+        })
+
+        if not serializer.is_valid():
+             return {
+                'status': status.HTTP_400_BAD_REQUEST,
+                'body': {
+                    'error': True, 
+                    'message': serializer.errors
+                }
+            }
+        
+        serializer.save()
+
+    #10. output
     return {
         'status' : status.HTTP_200_OK,
         'body' : {

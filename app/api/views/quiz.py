@@ -27,7 +27,7 @@ def quiz(request):
     
     #2. select quiz
     word = Quiz.objects.filter(deleted=False).order_by('?')[:pages]
-    serializer = QuizSerializer(word, many=True)
+    serializer = QuizSerializer(word, rand=True, many=True)
     data = serializer.data
 
     #3. user mode (evaluation)

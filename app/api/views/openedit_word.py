@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 import os, json
 
-from ..models import Dictionary, DictionaryVersion
+from ..models import Dictionary
 from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer, DictionaryPostSerializer, DictionaryVersionSerializer
 
 from text_to_speech import save
@@ -125,7 +125,7 @@ def openedit_PUT(user_id, request, word, wordid):
     dbdata = serializer.data
 
     #4. check user update content or not
-    if all(data[key] ==dbdata[key] for key in ['word', 'translation', 'phonetic', 'pos', 'classification', 'sentences']):
+    if all(data[key] == dbdata[key] for key in ['word', 'translation', 'phonetic', 'pos', 'classification', 'sentences']):
         return {
             'status' : status.HTTP_400_BAD_REQUEST,
             'body' : {
