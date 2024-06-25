@@ -32,7 +32,7 @@ def words(request):
         ###REPLACE THIS PART WITH ALGORITHM###
         if classification is not None:
             words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
-            words = words.filter(classification__contains=classification.lower()).order_by('?')[:pages]
+            words = words.filter(classification__contains=classification.lower(), deleted=False).order_by('?')[:pages]
         else:
             words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
 
@@ -49,7 +49,7 @@ def words(request):
     else:
         if classification is not None:
             words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
-            words = words.filter(classification__contains=classification.lower()).order_by('?')[:pages]
+            words = words.filter(classification__contains=classification.lower(), deleted=False).order_by('?')[:pages]
         else:
             words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
 

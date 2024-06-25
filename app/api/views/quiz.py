@@ -26,7 +26,7 @@ def quiz(request):
         pages = 1 
     
     #2. select quiz
-    word = Quiz.objects.order_by('?')[:pages]
+    word = Quiz.objects.filter(deleted=False).order_by('?')[:pages]
     serializer = QuizSerializer(word, many=True)
     data = serializer.data
 

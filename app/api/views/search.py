@@ -17,7 +17,7 @@ def search(request, text):
     word = word.lower()
 
     #3. search
-    dictionaries = Dictionary.objects.filter(word=word)
+    dictionaries = Dictionary.objects.filter(word=word, deleted=False)
     serializer = SearchSerializer(dictionaries, many=True)
     search = serializer.data
 

@@ -10,7 +10,7 @@ from api.serializers.dictionary_serializers import DictionarySerializer
 def word(request, word, wordid):
     try:
         #1. fetch
-        fetchword = Dictionary.objects.get(word=word, id=wordid)
+        fetchword = Dictionary.objects.get(word=word, id=wordid, deleted=False)
         serializer = DictionarySerializer(fetchword)
         data = serializer.data
 

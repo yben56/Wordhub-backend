@@ -48,7 +48,7 @@ def history_get(user_id, word, page):
     if word:
         history = SearchWord.objects.filter(user_id=user_id, dictionary__word=word).order_by('-date')[start:end]
     else:
-        history = SearchWord.objects.filter(user_id=user_id, ).order_by('-date')[start:end]
+        history = SearchWord.objects.filter(user_id=user_id).order_by('-date')[start:end]
 
     serializer = HistorySerializer(history, many=True)
     data = serializer.data

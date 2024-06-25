@@ -18,7 +18,7 @@ def associate(request, word):
     word = word.lower()
 
     #3. word
-    dictionaries = Dictionary.objects.filter(word=word)
+    dictionaries = Dictionary.objects.filter(word=word, deleted=False)
     serializer = AssociateSerializer(dictionaries, many=True)
     search = serializer.data
 
@@ -45,7 +45,7 @@ def associate(request, word):
     end = start + per_page
 
     #8. find words
-    dictionaries = Dictionary.objects.filter(word__in=association[start:end])
+    dictionaries = Dictionary.objects.filter(word__in=association[start:end], deleted=False)
     serializer = SearchSerializer(dictionaries, many=True)
     associate = serializer.data
 
