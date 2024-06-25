@@ -55,10 +55,10 @@ class Migration(migrations.Migration):
             fields=[
                 ("id", models.AutoField(primary_key=True, serialize=False)),
                 ("word", models.CharField(max_length=255)),
+                ("translation", models.CharField(max_length=255)),
                 ("phonetic", models.CharField(max_length=255, null=True)),
                 ("heteronyms", models.BooleanField(default=False)),
                 ("pos", models.CharField(max_length=30, null=True)),
-                ("translation", models.CharField(max_length=255)),
                 ("sentences", models.TextField(null=True)),
                 ("associate", models.TextField(null=True)),
                 ("classification", models.TextField(null=True)),

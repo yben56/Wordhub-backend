@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Dictionary
+from api.models import Dictionary, DictionaryVersion
 import json
 
 class DictionarySerializer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ class DictionaryUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Dictionary
-        fields = '__all__'
+        fields = ['translation', 'phonetic', 'pos', 'classification', 'sentences', 'auther']
     
     def update(self, instance, validated_data):
 
@@ -73,3 +73,12 @@ class DictionaryPostSerializer(serializers.ModelSerializer):
         dictionary_instance.save()
 
         return dictionary_instance
+    
+class DictionaryVersionSerializer(serializers.ModelSerializer):
+    associate = serializers.JSONField()
+    classification = serializers.JSONField()
+    sentences = serializers.JSONField()
+
+    class Meta:
+        model = DictionaryVersion
+        fields = '__all__'

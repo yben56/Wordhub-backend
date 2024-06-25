@@ -1,12 +1,13 @@
 from django.utils.translation import gettext as _
 from django.conf import settings
+from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 import os, json
 
-from ..models import Dictionary
-from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer, DictionaryPostSerializer
+from ..models import Dictionary, DictionaryVersion
+from api.serializers.dictionary_serializers import DictionarySerializer, DictionaryUpdateSerializer, DictionaryPostSerializer, DictionaryVersionSerializer
 
 from text_to_speech import save
 
@@ -111,28 +112,76 @@ def openedit_PUT(user_id, request, word, wordid):
     #2. don't change word (it pair with id!!!)
     data['word'] = word
 
-    #3. update
+    #3. get db data
     try:
-        fetchword = Dictionary.objects.get(word=word, id=wordid)
+        fetchword = Dictionary.objects.get(word=word, id=wordid, deleted=False)
     except Dictionary.DoesNotExist:
         return {
             'status' : status.HTTP_404_NOT_FOUND,
             'body' : { 'error' : True, 'message' : _('Page not found.') }
         }
-    serializer = DictionaryUpdateSerializer(fetchword, data=data)
+    
+    serializer = DictionarySerializer(fetchword)
+    dbdata = serializer.data
+
+    #4. check user update content or not
+    if all(data[key] ==dbdata[key] for key in ['word', 'translation', 'phonetic', 'pos', 'classification', 'sentences']):
+        return {
+            'status' : status.HTTP_400_BAD_REQUEST,
+            'body' : {
+                'error' : True,
+                'message' : 'update data == db data'
+            }
+        }
+
+    #5. dictionary version serializer
+    version_serializer = DictionaryVersionSerializer(data={
+        'dictionary' : dbdata['id'],
+        'word' : dbdata['word'],
+        'phonetic' : dbdata['phonetic'],
+        'heteronyms' : dbdata['heteronyms'],
+        'pos' : dbdata['pos'],
+        'translation' : dbdata['translation'],
+        'sentences' : dbdata['sentences'],
+        'associate' : dbdata['associate'],
+        'classification' : dbdata['classification'],
+        'auther' : dbdata['auther'],
+        'date' : dbdata['date'],
+    })
+
+    if not version_serializer.is_valid():
+        return {
+            'status' : status.HTTP_400_BAD_REQUEST,
+            'body' : {
+                'error' : True,
+                'message' : version_serializer.errors
+            }
+        }
+
+    #6. dictionary serializer
+    serializer = DictionaryUpdateSerializer(fetchword, data={
+        'translation' : data['translation'],
+        'phonetic' : data['phonetic'],
+        'pos' : data['pos'],
+        'classification' : data['classification'],
+        'sentences' : data['sentences'],
+        'auther' : user_id
+    })
     
     if not serializer.is_valid():
         return {
             'status' : status.HTTP_400_BAD_REQUEST,
             'body' : {
-                'error' : False,
+                'error' : True,
                 'message' : serializer.errors
             }
         }
 
-    serializer.save()
+    with transaction.atomic():
+        version_serializer.save()
+        serializer.save()
 
-    #4. output
+    #7. output
     return {
         'status' : status.HTTP_200_OK,
         'body' : {
