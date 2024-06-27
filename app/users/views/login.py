@@ -50,10 +50,10 @@ def login(request):
         return Response({
             'error': True,
             'message' : _('This email address has been registered but has not been confirmed yet. Please reconfirm your email')
-        }, status=status.HTTP_403_FORBIDDEN)
+        }, status=status.HTTP_401_UNAUTHORIZED)
     
     #6. ban
-    if not user.ban:
+    if user.ban:
         return Response({
             'error': True,
             'message' : _('This account has been banned. If you have any questions, please contact the administrator')
