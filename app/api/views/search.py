@@ -55,7 +55,7 @@ def search(request, text):
         es = True
 
         query = MultiMatch(query=text, fields=['word', 'translation'], fuzziness='1', minimum_should_match='80%')
-        search = WordDocument.search().query(query)[0:3]
+        search = WordDocument.search().query(query)[0:10]
         data = search.execute()
         data = [hit.to_dict() for hit in data]
 
