@@ -3,7 +3,7 @@ djangorestframework==3.15.1
 django-easy-validator==1.7.0
 django-cors-headers==4.3.1
 django-elasticsearch-dsl==8.14.0
-elasticsearch==8.8.2
+elasticsearch==8.14.0
 environs==11.0.0
 PyJWT==2.8.0
 requests==2.31.0
