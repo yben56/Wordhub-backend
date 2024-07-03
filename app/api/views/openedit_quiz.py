@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 import json
 
-from ..models import Quiz
+from ..models import Dictionary, Quiz
 from api.serializers.quiz_serializers import QuizSerializer, QuizUpdateSerializer, QuizVersionSerializer
 
 @api_view(['GET', 'PUT'])
@@ -68,7 +68,19 @@ def openedit_PUT(user_id, request, word, wordid):
     
     data = data['body']
 
-    #2. get data from db
+    #2. check wordid exist (Must have word for add or update quiz)
+    word = Dictionary.objects.filter(id=wordid).first()
+
+    if not word:
+        return {
+            'status' : status.HTTP_400_BAD_REQUEST,
+            'body' : {
+                'error' : True,
+                'message' : 'word not found, must have word before add or update quiz'
+            }
+        }
+
+    #3. get data from db
     quiz = Quiz.objects.filter(dictionary_id=wordid).first()
     quiz_serializer = QuizSerializer(quiz)
 
