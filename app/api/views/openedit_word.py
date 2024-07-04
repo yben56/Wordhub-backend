@@ -57,6 +57,7 @@ def openedit_GET(user_id, request, word, wordid):
     }
 
 def openedit_POST(user_id, request):
+
     #1. validation
     data = opedit_validation(request.body)
 
@@ -73,19 +74,30 @@ def openedit_POST(user_id, request):
 
     if exists:
         return {
-            'status' : status.HTTP_404_NOT_FOUND,
+            'status' : status.HTTP_409_CONFLICT,
             'body' : { 'error' : True, 'message' : _('Word already exist.') }
         }
 
     #3.
-    serializer = DictionaryPostSerializer(data=data)
+    serializer = DictionaryPostSerializer(data={
+        'word' : data['word'],
+        'translation' : data['translation'],
+        'phonetic' : data['phonetic'],
+        'pos' : data['pos'],
+        'classification' : data['classification'],
+        'sentences' : data['sentences'],
+        'auther' : user_id
+    })
+
     if not serializer.is_valid():
         return {
             'status' : status.HTTP_400_BAD_REQUEST,
             'body' : { 'error' : True, 'message' : serializer.errors }
         }
 
-    serializer.save()
+    instance = serializer.save()
+
+    last_insert_id = instance.id
 
     #4. Pronounce
     pronounce_path = os.environ.get('PRONOUNCE_PATH', 'PRONOUNCE_PATH not found')
@@ -94,7 +106,14 @@ def openedit_POST(user_id, request):
     
     return {
         'status' : status.HTTP_200_OK,
-        'body' : { 'error' : False, 'message' : '' }
+        'body' : {
+            'error' : False,
+            'message' : '',
+            'data' : {
+                'wordid' : last_insert_id,
+                'word' : data['word']
+            }
+        }
     }
 
 def openedit_PUT(user_id, request, word, wordid):
@@ -130,7 +149,7 @@ def openedit_PUT(user_id, request, word, wordid):
             'status' : status.HTTP_400_BAD_REQUEST,
             'body' : {
                 'error' : True,
-                'message' : 'update data == db data'
+                'message' : _('update data is the same as database')
             }
         }
 

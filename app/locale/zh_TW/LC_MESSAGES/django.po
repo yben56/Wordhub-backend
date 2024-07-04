@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-24 20:13+0800\n"
+"POT-Creation-Date: 2024-07-04 16:53+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\api\views\openedit_quiz.py:44 .\api\views\openedit_quiz.py:89
-#: .\api\views\openedit_word.py:44 .\api\views\openedit_word.py:120
-#: .\api\views\word.py:21 .\api\views\word.py:56
+#: .\api\views\openedit_quiz.py:45 .\api\views\openedit_word.py:45
+#: .\api\views\openedit_word.py:140 .\api\views\word.py:21
+#: .\api\views\word.py:56
 msgid "Page not found."
 msgstr ""
 
-#: .\api\views\openedit_word.py:76
+#: .\api\views\openedit_word.py:78
 msgid "Word already exist."
-msgstr ""
+msgstr "此單字已經重複存在資料庫"
+
+#: .\api\views\openedit_word.py:152
+msgid "update data is the same as database"
+msgstr "輸入資料跟資料庫是一樣"
 
 #: .\users\views\email_confirmation.py:44
 #, fuzzy
