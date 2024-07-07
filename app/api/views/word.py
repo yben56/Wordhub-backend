@@ -28,6 +28,7 @@ def word(request, word, wordid):
             created = AccessWord.objects.create(
                 user_id=request.user_id,
                 dictionary_id=wordid,
+                word=word
             )
 
             #5. evaluation
