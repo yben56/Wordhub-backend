@@ -66,8 +66,8 @@ class Frequency(models.Model):
     word = models.CharField(max_length=255, null=False)
     frequency = models.IntegerField()
 
-#Guest search
-class SearchGuest(models.Model):
+#Guest search word
+class SearchWordGuest(models.Model):
     search = models.TextField(null=False)
     word = models.CharField(max_length=255, null=True)
     exist = models.BooleanField(default=False)
@@ -77,7 +77,7 @@ class SearchGuest(models.Model):
         db_table = 'api_search_guest'
 
 #User search word
-class SearchWords(models.Model):
+class SearchWord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     search = models.TextField(null=False)
     word = models.CharField(max_length=255, null=True)
@@ -85,15 +85,14 @@ class SearchWords(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'api_search_words'
+        db_table = 'api_search_word'
 
-#User enter word
-class SearchWord(models.Model):
+#User access word
+class AccessWord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     dictionary = models.ForeignKey(Dictionary, on_delete=models.CASCADE)
-    count = models.IntegerField(default=1)
+    word = models.CharField(max_length=255, null=False)
     date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'api_search_word'
-        unique_together = ('user', 'dictionary')
+        db_table = 'api_access_word'

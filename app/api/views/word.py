@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from ..models import Dictionary, SearchWord
+from ..models import Dictionary, AccessWord
 from api.serializers.dictionary_serializers import DictionarySerializer
 
 @api_view(['GET'])
@@ -25,25 +25,19 @@ def word(request, word, wordid):
         #3. user mode only
         if request.user_id:
             #4. create
-            obj, created = SearchWord.objects.update_or_create(
+            created = AccessWord.objects.create(
                 user_id=request.user_id,
                 dictionary_id=wordid,
             )
 
-            #5. update
-            if not created:
-                obj.count += 1
-                obj.date = timezone.now()
-                obj.save()
-
-            #6. evaluation
+            #5. evaluation
             from ..utils import calculate_accuracy
             data['evaluation'] = calculate_accuracy(request.user_id, word)
 
-        #7.
+        #6.
         data['probability'] = 6
        
-        #8. output
+        #7. output
         return Response({
             'error' : False,
             'message' : '',

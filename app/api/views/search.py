@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from ..models import Dictionary, SearchGuest, SearchWords
+from ..models import Dictionary, SearchWordGuest, SearchWord
 from api.serializers.search_serializers import SearchSerializer
 
 from deep_translator import GoogleTranslator
@@ -32,11 +32,11 @@ def search(request, text):
     #5. search record
     if request.user_id:
         #user mode
-        save_search = SearchWords(user_id=request.user_id, search=text, word=word, exist=exist)
+        save_search = SearchWord(user_id=request.user_id, search=text, word=word, exist=exist)
         save_search.save()
     else:
         #guest mode
-        save_search = SearchGuest(search=text, word=word, exist=exist)
+        save_search = SearchWordGuest(search=text, word=word, exist=exist)
         save_search.save()
 
     #6.
