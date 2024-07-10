@@ -1,0 +1,51 @@
+from django.utils.translation import gettext as _
+from django.utils import timezone
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+
+from ..models import SearchWord, AccessWord, Answer
+from ..recommendation import recommend
+from datetime import timedelta
+import pandas as pd
+import numpy as np
+import json
+
+@api_view(['GET'])
+def words_distribution(request):
+
+    timerange = timezone.now() - timedelta(days=2)
+
+    #1. fetch search
+    search_words = SearchWord.objects.filter(user_id=request.user_id, exist=True, date__gte=timerange).values()
+
+    #2. fetch access
+    access_words = AccessWord.objects.filter(user_id=request.user_id, date__gte=timerange).values()
+
+    #3. fetch quiz answer
+    answer_words = Answer.objects.filter(user_id=request.user_id, date__gte=timerange).values('word', 'correct', 'trials', 'date')
+
+    #4. caculate counts
+    search_words = recommend(search_words, 1)
+    access_words = recommend(access_words, 1.5)
+    answer_words = recommend(answer_words, 2, True)
+
+    #5. merge 3 df
+    df = pd.concat([search_words, access_words, answer_words])
+
+    df = df.groupby('word', as_index=False).sum()
+
+    '''
+    #6. probability for each words
+    total_counts = df['counts'].sum()
+    df['probability'] = round(df['counts'] / total_counts, 2)
+    df['probability'] = df['probability'] / df['probability'].sum()
+    '''
+
+    df = df.set_index('word')['counts'].to_dict()
+
+    return Response({
+        'error' : False,
+        'message' : '',
+        'data' : df
+    }, status=200)
