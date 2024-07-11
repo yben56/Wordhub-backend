@@ -33,15 +33,10 @@ def words_distribution(request):
     #5. merge 3 df
     df = pd.concat([search_words, access_words, answer_words])
 
+    #6. group same word and sum
     df = df.groupby('word', as_index=False).sum()
 
-    '''
-    #6. probability for each words
-    total_counts = df['counts'].sum()
-    df['probability'] = round(df['counts'] / total_counts, 2)
-    df['probability'] = df['probability'] / df['probability'].sum()
-    '''
-
+    #7. to dictionary
     df = df.set_index('word')['counts'].to_dict()
 
     return Response({

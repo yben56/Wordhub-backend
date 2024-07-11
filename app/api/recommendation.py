@@ -3,9 +3,14 @@ import pandas as pd
 from datetime import datetime, timezone
 
 def recommend(data, weight, quiz=False, discount=0.9):
+    
     df = pd.DataFrame(data)
 
-    #1. days
+    #1. no data
+    if len(df) == 0:
+        return df
+
+    #2. days
     df = days(df)
     
     if quiz:
@@ -24,8 +29,14 @@ def recommend(data, weight, quiz=False, discount=0.9):
         #1. counts = weight * discount^t
         df['counts'] = weight * np.power(discount, df['days'])
     
-    #2. group and sum
+    #3. group and sum
     df = df.groupby('word')['counts'].sum().reset_index()
+
+    #4. remove probability = 0
+    df = df[df['counts'] != 0]
+
+    #5. round
+    df['counts'] = df['counts'].apply(round)
 
     return df
 
