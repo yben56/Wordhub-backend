@@ -14,7 +14,7 @@ import json
 @api_view(['GET'])
 def words_distribution(request):
 
-    timerange = timezone.now() - timedelta(days=2)
+    timerange = timezone.now() - timedelta(days=30)
 
     #1. fetch search
     search_words = SearchWord.objects.filter(user_id=request.user_id, exist=True, date__gte=timerange).values()
