@@ -11,22 +11,22 @@ import json, os, random
 
 @api_view(['GET'])
 def quiz(request):
-    #1. pages
-    pages = request.GET.get('pages')
+    #1. items
+    items = request.GET.get('items')
 
-    if pages is not None:
+    if items is not None:
         try:
-            pages = int(pages)
+            items = int(items)
         except ValueError:
             return Response({
                 'error' : True,
-                'message' : 'Invalid Pages'
+                'message' : 'Invalid items'
             }, status=status.HTTP_400_BAD_REQUEST)
     else:
-        pages = 1 
+        items = 1 
     
     #2. select quiz
-    word = Quiz.objects.filter(deleted=False).order_by('?')[:pages]
+    word = Quiz.objects.filter(deleted=False).order_by('?')[:items]
     serializer = QuizSerializer(word, rand=True, many=True)
     data = serializer.data
 
