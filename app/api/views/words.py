@@ -9,99 +9,91 @@ from api.serializers.dictionary_serializers import DictionarySerializer
 from ..utils import calculate_accuracy
 
 from ..recommendation import recommend
-from datetime import timedelta
 import pandas as pd
-import numpy as np
+import ast, json
 
 @api_view(['GET'])
 def words(request):
-    #1. pages
-    pages = request.GET.get('pages')
+    try:
+        items = int(request.GET.get('items', 9))
+    except ValueError:
+        return Response({'error': True, 'message' : 'items be an integer'}, status=400)
 
-    if pages is not None:
-        try:
-            pages = int(pages)
-        except ValueError:
-            return Response({
-                'error' : True,
-                'message' : 'Invalid Pages'
-            }
-            , status=status.HTTP_400_BAD_REQUEST)
-    else:
-        pages = 9 
+    #1. classification
+    classification = request.GET.get('classification', None)
+    
+    if classification is not None:
+        classification = classification.lower()
 
-    #2. classification
-    classification = request.GET.get('classification')
-
-    #3. user mode
+    #2. user mode
     if request.user_id:
+        #3. get recommand list
+        recommand = request.GET.get('recommand', [])
 
-        timerange = timezone.now() - timedelta(days=2)
+        if len(recommand) != 0:
+            try:
+                recommand = ast.literal_eval(recommand)
+            except (SyntaxError, ValueError) as e:
+                return Response({'error': True, 'message' : 'recommand must be a list'}, status=400)
 
-        #1. fetch search
-        search_words = SearchWord.objects.filter(user_id=request.user_id, exist=True, date__gte=timerange).values()
+        #4. prevent recommand redundant
+        if len(recommand) > items:
+            return Response({'error': True, 'message' : 'items mus >= recommand length'}, status=400)
 
-        #2. fetch access
-        access_words = AccessWord.objects.filter(user_id=request.user_id, date__gte=timerange).values()
+        #5. select recommand words
+        if len(recommand) > 0:
+            recommandwords = Dictionary.objects.filter(word__in=list(recommand)).order_by('?')
+            serializer = DictionarySerializer(recommandwords, many=True)
+            recommandwords = serializer.data
 
-        #3. fetch quiz answer
-        answer_words = Answer.objects.filter(user_id=request.user_id, date__gte=timerange).values('word', 'correct', 'trials', 'date')
-
-        #4. caculate counts
-        search_words = recommend(search_words, 1)
-        access_words = recommend(access_words, 1.5)
-        answer_words = recommend(answer_words, 2, True)
-
-        #5. merge 3 df
-        df = pd.concat([search_words, access_words, answer_words])
-
-        df = df.groupby('word', as_index=False).sum()
-
-        #6. probability for each words
-        total_counts = df['counts'].sum()
-        df['probability'] = round(df['counts'] / total_counts, 2)
-        df['probability'] = df['probability'] / df['probability'].sum()
-
-        #7. select words from distribution
-        selected_words = np.random.choice(df['word'], size=3, p=df['probability'], replace=False)
-
-        words = Dictionary.objects.filter(word__in=list(selected_words)).order_by('?')
-        serializer = DictionarySerializer(words, many=True)
-        data = serializer.data
-
-        '''
-        if classification is not None:
-            words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
-            words = words.filter(classification__contains=classification.lower(), deleted=False).order_by('?')[:pages]
+            #transform to df & select unique rand
+            recommandwords = pd.DataFrame(recommandwords)
+            recommandwords = recommandwords.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
         else:
-            words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
+            recommandwords = pd.DataFrame()
 
-        serializer = DictionarySerializer(words, many=True)
-        data = serializer.data
-        '''
+        #6. select rand words
+        if items - len(recommand) > 0:
+            randwords = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
 
+            if classification:
+                randwords = randwords.filter(classification__contains=classification, deleted=False).order_by('?')[:items - len(recommand)]
+            else:
+                randwords = randwords.filter(deleted=False).order_by('?')[:items - len(recommand)]
+
+            serializer = DictionarySerializer(randwords, many=True)
+            randwords = serializer.data
+
+            #transform to df
+            randwords = pd.DataFrame(randwords)
+        else:
+            randwords = pd.DataFrame()
+        
+        #7. merge recommandwords & randwords & transform to json
+        data = pd.concat([recommandwords, randwords], ignore_index=True)
+        data = data.to_json(orient='records', force_ascii=False)
+        data = json.loads(data)
+
+        #8. evaluation
         for index in range(len(data)):
-            data[index]['probability'] = 6
-
-            #4. evaluation
             data[index]['evaluation'] = calculate_accuracy(request.user_id, data[index]['word'])
         
-
-    #5. guess mode
+    #9. guess mode
     else:
         if classification is not None:
             words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
-            words = words.filter(classification__contains=classification.lower(), deleted=False).order_by('?')[:pages]
+            words = words.filter(classification__contains=classification.lower(), deleted=False).order_by('?')[:items]
         else:
-            words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:pages]
+            words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative']).order_by('?')[:items]
 
         serializer = DictionarySerializer(words, many=True)
         data = serializer.data
 
-        for index in range(len(data)):
-            data[index]['probability'] = 6
+    #10. probability
+    for index in range(len(data)):
+        data[index]['probability'] = 0
 
-    #6. resposne
+    #11. resposne
     return Response({
         'error' : False,
         'message' : '',
