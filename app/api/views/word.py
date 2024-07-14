@@ -36,7 +36,7 @@ def word(request, word, wordid):
             data['evaluation'] = calculate_accuracy(request.user_id, word)
 
         #6.
-        data['probability'] = 6
+        data['probability'] = ''
        
         #7. output
         return Response({

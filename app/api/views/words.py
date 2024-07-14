@@ -42,24 +42,33 @@ def words(request):
 
         #5. select recommand words
         if len(recommand) > 0:
-            recommandwords = Dictionary.objects.filter(word__in=list(recommand)).order_by('?')
+            if classification:
+                recommandwords = Dictionary.objects.filter(word__in=list(recommand), classification__contains=classification, deleted=False).order_by('?')
+            else:
+                recommandwords = Dictionary.objects.filter(word__in=list(recommand), deleted=False).order_by('?')
+
             serializer = DictionarySerializer(recommandwords, many=True)
             recommandwords = serializer.data
 
             #transform to df & select unique rand
             recommandwords = pd.DataFrame(recommandwords)
-            recommandwords = recommandwords.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
+
+            if len(recommandwords):
+                recommandwords = recommandwords.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
         else:
             recommandwords = pd.DataFrame()
 
-        #6. select rand words
-        if items - len(recommand) > 0:
+        #6. rand num (total - len(recommandwords))
+        randnum = items - len(recommandwords)
+           
+        #7. select rand words
+        if randnum > 0:
             randwords = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
 
             if classification:
-                randwords = randwords.filter(classification__contains=classification, deleted=False).order_by('?')[:items - len(recommand)]
+                randwords = randwords.filter(classification__contains=classification, deleted=False).order_by('?')[:randnum]
             else:
-                randwords = randwords.filter(deleted=False).order_by('?')[:items - len(recommand)]
+                randwords = randwords.filter(deleted=False).order_by('?')[:randnum]
 
             serializer = DictionarySerializer(randwords, many=True)
             randwords = serializer.data
@@ -68,17 +77,17 @@ def words(request):
             randwords = pd.DataFrame(randwords)
         else:
             randwords = pd.DataFrame()
-        
-        #7. merge recommandwords & randwords & transform to json
+            
+        #8. merge recommandwords & randwords & transform to json
         data = pd.concat([recommandwords, randwords], ignore_index=True)
         data = data.to_json(orient='records', force_ascii=False)
         data = json.loads(data)
 
-        #8. evaluation
+        #9. evaluation
         for index in range(len(data)):
             data[index]['evaluation'] = calculate_accuracy(request.user_id, data[index]['word'])
         
-    #9. guess mode
+    #10. guess mode
     else:
         if classification is not None:
             words = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
@@ -89,11 +98,11 @@ def words(request):
         serializer = DictionarySerializer(words, many=True)
         data = serializer.data
 
-    #10. probability
+    #11. probability
     for index in range(len(data)):
-        data[index]['probability'] = 0
+        data[index]['probability'] = ''
 
-    #11. resposne
+    #12. resposne
     return Response({
         'error' : False,
         'message' : '',

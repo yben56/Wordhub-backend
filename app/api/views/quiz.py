@@ -40,13 +40,18 @@ def quiz(request):
 
             #transform to df & select unique rand
             recommandquiz = pd.DataFrame(recommandquiz)
-            recommandquiz = recommandquiz.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
+
+            if len(recommandquiz):
+                recommandquiz = recommandquiz.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
         else:
             recommandquiz = pd.DataFrame()
 
-        #6. select rand words
-        if items - len(recommand) > 0:
-            randquiz = Quiz.objects.filter(deleted=False).order_by('?')[:items - len(recommand)]
+        #6. rand num (total - len(recommandquiz))
+        randnum = items - len(recommandquiz)
+
+        #7. select rand words
+        if randnum > 0:
+            randquiz = Quiz.objects.filter(deleted=False).order_by('?')[:randnum]
 
             serializer = QuizSerializer(randquiz, many=True)
             randquiz = serializer.data
@@ -56,21 +61,20 @@ def quiz(request):
         else:
             randquiz = pd.DataFrame()
 
-        #7. merge recommandwords & randwords & transform to json
+        #8. merge recommandwords & randwords & transform to json
         data = pd.concat([recommandquiz, randquiz], ignore_index=True)
         data = data.to_json(orient='records', force_ascii=False)
         data = json.loads(data)
 
-        #8. user mode (evaluation)
+        #9. user mode (evaluation)
         for index in range(len(data)):
             data[index]['evaluation'] = calculate_accuracy(request.user_id, data[index]['word'])
     else:
-        #9. guess mode
+        #10. guess mode
         quiz = Quiz.objects.filter(deleted=False).order_by('?')[:items]
         serializer = QuizSerializer(quiz, rand=True, many=True)
         data = serializer.data
 
-    
     return Response({
         'error' : False,
         'message' : '',
