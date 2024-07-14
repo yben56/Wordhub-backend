@@ -1,8 +1,9 @@
 from django.utils.translation import gettext as _
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from ..models import SearchWord
+from ..models import AccessWord
 from api.serializers.history_serializers import HistorySerializer
 
 @api_view(['GET', 'DELETE'])
@@ -46,9 +47,9 @@ def history_get(user_id, word, page):
 
     #2.
     if word:
-        history = SearchWord.objects.filter(user_id=user_id, dictionary__word=word).order_by('-date')[start:end]
+        history = AccessWord.objects.filter(Q(user_id=user_id) & Q(dictionary__word=word) | Q(dictionary__translation=word)).order_by('-date')[start:end]
     else:
-        history = SearchWord.objects.filter(user_id=user_id).order_by('-date')[start:end]
+        history = AccessWord.objects.filter(user_id=user_id).order_by('-date')[start:end]
 
     serializer = HistorySerializer(history, many=True)
     data = serializer.data
@@ -72,6 +73,6 @@ def history_delete(user_id, wordid):
         }, status=200)
 
     #3. DELETE
-    deleted_count, _ = SearchWord.objects.filter(user_id=user_id, dictionary_id=wordid).delete()
+    deleted_count, _ = AccessWord.objects.filter(user_id=user_id, dictionary_id=wordid).delete()
 
     return deleted_count

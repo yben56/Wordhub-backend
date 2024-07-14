@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Dictionary, SearchWord
+from api.models import Dictionary, AccessWord
 
 class DictionarySerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,5 +13,5 @@ class HistorySerializer(serializers.ModelSerializer):
     translation = serializers.CharField(source='dictionary.translation')
     
     class Meta:
-        model = SearchWord
-        fields = ['id', 'word', 'pos', 'translation', 'count', 'date']
+        model = AccessWord
+        fields = ['id', 'word', 'pos', 'translation', 'date']
