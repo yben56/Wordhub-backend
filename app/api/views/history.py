@@ -6,6 +6,9 @@ from rest_framework.decorators import api_view
 from ..models import AccessWord
 from api.serializers.history_serializers import HistorySerializer
 
+from django.db.models import Max, Min, OuterRef, Subquery
+import json
+
 @api_view(['GET', 'DELETE'])
 def history(request):
     if request.method == 'GET':
@@ -45,16 +48,29 @@ def history_get(user_id, word, page):
     start = (page - 1) * per_page
     end = start + per_page
 
-    #2.
+    #2. select newest row and group by dictionary_id
+    query = AccessWord.objects.filter(user_id=user_id).values('dictionary_id').annotate(latest_date=Max('date'))
+
     if word:
-        history = AccessWord.objects.filter(Q(user_id=user_id) & Q(dictionary__word=word) | Q(dictionary__translation=word)).order_by('-date')[start:end]
+        #3. user search specific word
+        history = AccessWord.objects.filter(
+            Q(user_id=user_id) & 
+            Q(dictionary_id__in=query.values('dictionary_id')) & 
+            Q(date__in=query.values('latest_date')) &
+            Q(dictionary__word=word) | Q(dictionary__translation=word)
+        ).order_by('-date')[start:end]
     else:
-        history = AccessWord.objects.filter(user_id=user_id).order_by('-date')[start:end]
+        #4. user search all words
+        history = AccessWord.objects.filter(
+            Q(user_id=user_id) &
+            Q(dictionary_id__in=query.values('dictionary_id')) & 
+            Q(date__in=query.values('latest_date'))
+        ).order_by('-date')[start:end]
 
     serializer = HistorySerializer(history, many=True)
     data = serializer.data
 
-    #3.
+    #5.
     return data
 
 def history_delete(user_id, wordid):
