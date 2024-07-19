@@ -9,7 +9,6 @@ from ..recommendation import recommend
 from datetime import timedelta
 import pandas as pd
 import numpy as np
-import json
 
 @api_view(['GET'])
 def words_distribution(request):
@@ -33,14 +32,22 @@ def words_distribution(request):
     #5. merge 3 df
     df = pd.concat([search_words, access_words, answer_words])
 
-    #6. group same word and sum
+    #6. if no records
+    if len(df) == 0:
+        return Response({
+            'error' : False,
+            'message' : '',
+            'data' : {}
+        }, status.HTTP_200_OK)
+
+    #7. group same word and sum
     df = df.groupby('word', as_index=False).sum()
 
-    #7. to dictionary
+    #8. to dictionary
     df = df.set_index('word')['counts'].to_dict()
 
     return Response({
         'error' : False,
         'message' : '',
         'data' : df
-    }, status=200)
+    }, status.HTTP_200_OK)
