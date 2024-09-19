@@ -36,7 +36,7 @@ def recommend(data, weight, quiz=False, discount=0.9):
     df = df[df['counts'] != 0]
 
     #5. round
-    df['counts'] = df['counts'].apply(round)
+    df['counts'] = df['counts'].apply(lambda x: max(round(x), 1))
 
     return df
 
