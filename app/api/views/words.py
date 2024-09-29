@@ -10,7 +10,7 @@ from ..utils import calculate_accuracy
 
 from ..recommendation import recommend
 import pandas as pd
-import ast, json
+import ast, json, random
 
 @api_view(['GET'])
 def words(request):
@@ -27,6 +27,7 @@ def words(request):
 
     #2. user mode
     if request.user_id:
+        #recommand###########################################################################################
         #3. get recommand list
         recommand = request.GET.get('recommand', [])
 
@@ -53,22 +54,53 @@ def words(request):
             #transform to df & select unique rand
             recommandwords = pd.DataFrame(recommandwords)
 
+            #remove multiple words (some words have multiple row, ex: bat:蝙蝠, bat:球棒)
             if len(recommandwords):
                 recommandwords = recommandwords.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
         else:
             recommandwords = pd.DataFrame()
 
-        #6. rand num (total - len(recommandwords))
-        randnum = items - len(recommandwords)
-           
-        #7. select rand words
-        if randnum > 0:
+        #6.remain num (total - len(recommandwords))
+        remainnum = items - len(recommandwords)
+        
+        #associate word (required have recommand)###################################################################################
+        #7. select random associate words
+        if len(recommandwords) > 0:
+            randassociateword = recommandwords['associate'].apply(lambda x: list(x.keys()))
+            randassociateword = pd.Series(sum(randassociateword, []))
+
+            #convert to list (associateword may less than remain)
+            if len(randassociateword) >= remainnum:
+                randassociateword = random.sample(randassociateword.tolist(), remainnum)
+            else:
+                randassociateword = random.sample(randassociateword.tolist(), len(randassociateword))
+
+            #fetch associateword
+            associateword = Dictionary.objects.filter(word__in=randassociateword, deleted=False).distinct()
+            serializer = DictionarySerializer(associateword, many=True)
+            associateword = serializer.data
+
+            #transform to df
+            associateword = pd.DataFrame(associateword)
+
+            #remove multiple words (some words have multiple row, ex: bat:蝙蝠, bat:球棒)
+            if len(associateword):
+                associateword = associateword.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
+            
+            #remain num (total - len(recommandwords))
+            remainnum = remainnum - len(associateword)
+        else:
+            associateword = pd.DataFrame()
+
+        #rand words###########################################################################################
+        #8. select rand words
+        if remainnum > 0:
             randwords = Dictionary.objects.exclude(pos__in=['abbreviation', 'interrogative'])
 
             if classification:
-                randwords = randwords.filter(classification__contains=classification, deleted=False).order_by('?')[:randnum]
+                randwords = randwords.filter(classification__contains=classification, deleted=False).order_by('?')[:remainnum]
             else:
-                randwords = randwords.filter(deleted=False).order_by('?')[:randnum]
+                randwords = randwords.filter(deleted=False).order_by('?')[:remainnum]
 
             serializer = DictionarySerializer(randwords, many=True)
             randwords = serializer.data
@@ -77,9 +109,11 @@ def words(request):
             randwords = pd.DataFrame(randwords)
         else:
             randwords = pd.DataFrame()
-            
+
+        #merge recommand, associate, randwords ####################################################################  
         #8. merge recommandwords & randwords & transform to json
-        data = pd.concat([recommandwords, randwords], ignore_index=True)
+        data = pd.concat([recommandwords, associateword, randwords], ignore_index=True)
+
         data = data.to_json(orient='records', force_ascii=False)
         data = json.loads(data)
 
