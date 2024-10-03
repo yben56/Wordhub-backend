@@ -245,9 +245,11 @@ def opedit_validation(body):
        return { 'error' : True, 'message' : 'pos must from list we provided' }
     
     #7. check classification
+    '''
     for classification in body['classification']:
         if classification not in classification_list:
             return { 'error' : True, 'message' : 'classification must from dict we provided' }
+    '''
     
     #8. check sentences
     for sentence in body['sentences']:
