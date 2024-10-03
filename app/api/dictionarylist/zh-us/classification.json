@@ -1,0 +1,58 @@
+{
+    "動物&植物" : { 
+        "animal" : "Ainmal",
+        "bird" : "Bird",
+        "fish" : "Fish",
+        "insect" : "Insect",
+        "plant" : "Plant",
+        "tree" : "Tree",
+        "flower" : "Flower"
+    },
+    "食物&飲料" : { 
+        "food" : "Food",
+        "beverage" : "Beverage",
+        "vegetable" : "Vegetable",
+        "fruit" : "Fruit"
+    },
+    "醫療&健康" : { 
+        "medical" : "Medical",
+        "health" : "Health",
+        "body" : "Body"
+    },
+    "心理" : { 
+        "emotional" : "Emotional",
+        "feel" : "Feel"
+    },
+    "政治&法律" : { 
+        "law" : "Law",
+        "crime" : "Crime",
+        "military" : "Military",
+        "politics" : "Politics"   
+    },
+    "商業&社交" : {
+        "business" : "Business",
+        "social" : "Social"
+    },
+    "自然與科學" : {  
+        "weather" : "Weather",
+        "geographic" : "Geographic",
+        "science" : "Science"
+    },
+    "交通&旅遊" : {
+        "traffic" : "Traffic",
+        "travel" : "Travel"
+    },
+    "數字&量詞" : {
+        "quantifier" : "Quantifier",
+        "numerical" : "Numerical",
+        "datetime" : "Datetime"
+    },
+    "國家&地區" : {
+        "country" : "Country",
+        "city" : "City"
+    },
+    "娛樂&體育": {
+        "entertainment" : "Entertainment",
+        "sports" : "Sports"
+    }
+}
