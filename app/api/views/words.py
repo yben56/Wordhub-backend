@@ -101,8 +101,8 @@ def recommandword(recommand, classification, items):
 
             #2. prevent recommand redundant
             if len(recommand) > items:
-                return {'error': True, 'message' : 'items mus >= recommand length'}
-            
+                return {'error': True, 'message' : 'items must >= recommand length'}
+ 
             #3. select recommand words
             if classification:
                 recommandwords = Dictionary.objects.filter(word__in=list(recommand), classification__contains=classification, deleted=False).order_by('?')
@@ -111,12 +111,13 @@ def recommandword(recommand, classification, items):
 
             serializer = DictionarySerializer(recommandwords, many=True)
             recommandwords = serializer.data
-
+            
             #4. transform to df & select unique rand
             recommandwords = pd.DataFrame(recommandwords)
 
             #5. remove multiple words (some words have multiple row, ex: bat:蝙蝠, bat:球棒)
-            recommandwords = recommandwords.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
+            if len(recommandwords):
+                recommandwords = recommandwords.groupby("word").sample(n=1, random_state=1).reset_index(drop=True)
         else:
             recommandwords = pd.DataFrame()
 
