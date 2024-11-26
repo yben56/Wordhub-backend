@@ -69,13 +69,17 @@ def login(request):
         'data' : {
             'access_token' : access_token['token'],
             'access_token_exp' : access_token['exp'],
-            'refresh_token' : refresh_token['token'],
-            'refresh_token_exp' : refresh_token['exp'],
             'first_name' : user.first_name,
             'profile_picture' : user.profile_picture
         }
     }, status=status.HTTP_200_OK)
     
-    response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+    response.set_cookie(
+        key='refresh_token', 
+        value=refresh_token, 
+        httponly=True,
+        secure=True, # allow only https（dev enviroment can set False）
+        samesite='Strict' #prevent CSRF attack             
+    )
 
     return response
