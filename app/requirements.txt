@@ -11,3 +11,4 @@ pandas
 deep-translator
 text-to-speech
 openai
+gunicorn
