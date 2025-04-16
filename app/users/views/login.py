@@ -78,8 +78,9 @@ def login(request):
         key='refresh_token', 
         value=refresh_token, 
         httponly=True,
-        secure=True, # allow only https（dev enviroment can set False）
-        samesite='Strict' #prevent CSRF attack             
+        secure=os.environ.get('SET_COOKIE_SECURE', 'SET_COOKIE_SECURE not found'), # allow only https（dev enviroment can set False）
+        samesite='Strict', #prevent CSRF attack
+        max_age=30 * 24 * 60 * 60    
     )
 
     return response
