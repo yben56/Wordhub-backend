@@ -1,4 +1,6 @@
 .env*
+.env.pro
+.env.dev
 db.sqlite3
 __pycache__/
 app/app/__pycache__
