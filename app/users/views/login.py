@@ -60,8 +60,12 @@ def login(request):
         }, status=status.HTTP_403_FORBIDDEN)
     
     #7. token
-    access_token = create_token(user.id, os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'), 720)
-    refresh_token = create_token(user.id, os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET not found'), 720)
+    access_token = create_token(user.id, os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'), 5)
+    refresh_token = create_token(
+        user.id, 
+        os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET not found'), 
+        os.environ.get('JWT_REFRESH_EXP', 'JWT_REFRESH_EXP not found')
+    )
 
     response = Response({
         'error' : False,
@@ -76,11 +80,11 @@ def login(request):
     
     response.set_cookie(
         key='refresh_token', 
-        value=refresh_token, 
+        value=refresh_token['token'], 
         httponly=True,
         secure=os.environ.get('SET_COOKIE_SECURE', 'SET_COOKIE_SECURE not found'), # allow only https（dev enviroment can set False）
         samesite='Strict', #prevent CSRF attack
-        max_age=30 * 24 * 60 * 60    
+        max_age=60 * 60 * 24 * 30, 
     )
 
     return response

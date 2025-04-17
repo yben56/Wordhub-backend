@@ -9,6 +9,6 @@ def logout(request):
         'message' : ''
     }, status=status.HTTP_200_OK)
 
-    response.delete_cookie(key='refresh_token')
+    response.delete_cookie(key='refresh_token', path='/')
     
     return response
