@@ -60,7 +60,7 @@ def login(request):
         }, status=status.HTTP_403_FORBIDDEN)
     
     #7. token
-    access_token = create_token(user.id, os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'), 5)
+    access_token = create_token(user.id, os.environ.get('JWT_ACCESS_SECRET', 'JWT_ACCESS_SECRET not found'), 15)
     refresh_token = create_token(
         user.id, 
         os.environ.get('JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET not found'), 
